@@ -88,7 +88,7 @@ def main():
         """, unsafe_allow_html=True)
 
     st.sidebar.header("Model Parameters")
-    scenario = st.sidebar.selectbox("Select Scenario", ["Hospital Capacity", "Seasonal Variation", "Custom Scenario"])
+    scenario = st.sidebar.selectbox("Select Scenario", ["Hospital Capacity", "Seasonal Variation", "Funerary Transmission", "Safe and Dignified Burials"])
 
     default_params = {
         "Hospital Capacity": {
@@ -111,7 +111,7 @@ def main():
             "kappa": 0.05,
             "phi": 0.05
         },
-        "Custom Scenario": {
+        "Funerary Transmission": {
             "beta": 0.3,
             "sigma": 0.2,
             "gamma": 0.1,
@@ -120,6 +120,16 @@ def main():
             "omega": 0.01,
             "kappa": 0.05,
             "phi": 0.05
+        },
+        "Safe and Dignified Burials": {
+            "beta": 0.3,
+            "sigma": 0.2,
+            "gamma": 0.1,
+            "delta": 0.05,
+            "nu": 0.05,
+            "omega": 0.01,
+            "kappa": 0.05,
+            "phi": 0.01
         }
     }
 
@@ -173,8 +183,17 @@ def main():
             }
             results = run_simulation(params, initial_conditions, days, time_dependent_params=time_dependent_params)
             plot_results(results)
-        elif scenario == "Custom Scenario":
-            results = run_simulation(params, initial_conditions, days)
+        elif scenario == "Funerary Transmission":
+            funerary_transmission_params = {
+                'phi': 0.1
+            }
+            results = run_simulation(params, initial_conditions, days, time_dependent_params=funerary_transmission_params)
+            plot_results(results)
+        elif scenario == "Safe and Dignified Burials":
+            sdb_params = {
+                'phi': 0.01
+            }
+            results = run_simulation(params, initial_conditions, days, time_dependent_params=sdb_params)
             plot_results(results)
         plot_scenarios(scenario, params, initial_conditions)
 

@@ -19,13 +19,17 @@ class SEIRDVFModel:
         else:
             beta = self.params['beta']
 
+        if self.time_dependent_params and 'phi' in self.time_dependent_params:
+            phi = self.time_dependent_params['phi']
+        else:
+            phi = self.params['phi']
+
         sigma = self.params['sigma']
         gamma = self.params['gamma']
         delta = self.params['delta']
         nu = self.params['nu']
         omega = self.params['omega']
         kappa = self.params['kappa']
-        phi = self.params['phi']
 
         dSdt = -beta * S * (I + phi * F) / N - nu * S + omega * R + omega * V
         dEdt = beta * S * (I + phi * F) / N - sigma * E
