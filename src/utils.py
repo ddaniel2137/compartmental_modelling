@@ -13,7 +13,8 @@ def estimate_parameters(observed_data, initial_guess, initial_conditions, method
     def objective(params):
         params_dict = {
             'beta': params[0], 'sigma': params[1], 'gamma': params[2], 'mu': params[3],
-            'delta': params[4], 'nu': params[5], 'omega': params[6], 'kappa': params[7], 'phi': params[8]
+            'delta': params[4], 'nu': params[5], 'omega': params[6], 'kappa': params[7], 'phi': params[8],
+            'beta_HV': params[9], 'beta_VH': params[10], 'gamma_b': params[11]
         }
         simulated_data = run_simulation(params_dict, initial_conditions)
         

@@ -6,10 +6,10 @@ from typing import Dict, Any
 
 def plot_results(results: Dict[str, Any]):
     fig = go.Figure()
-    compartments = ['S', 'E', 'I', 'R', 'D', 'V', 'F']
+    compartments = ['S', 'E', 'I', 'R', 'D', 'V', 'F', 'S_b', 'I_b', 'R_b']
     for compartment in compartments:
         fig.add_trace(go.Scatter(x=results['t'], y=results[compartment], mode='lines', name=compartment))
-    fig.update_layout(title='SEIRDVF Model Results', xaxis_title='Time (days)', yaxis_title='Population')
+    fig.update_layout(title='Extended SEIRDVFB Model Results', xaxis_title='Time (days)', yaxis_title='Population')
     st.plotly_chart(fig)
 
 def plot_scenarios(scenario: str, params: Dict[str, float], initial_conditions: Dict[str, float]):

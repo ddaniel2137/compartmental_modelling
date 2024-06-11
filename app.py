@@ -1,15 +1,14 @@
 import streamlit as st
-from src.models import SEIRDVFModel
+import numpy as np
+import pandas as pd
 from src.simulation import run_simulation
 from src.visualization import plot_results, plot_scenarios
 from src.utils import generate_synthetic_data, estimate_parameters
-import numpy as np
-import pandas as pd
 
 def main():
-    st.title("SEIRDVF Epidemic Model Simulation")
+    st.title("Extended SEIRDVFB Model for Ebola")
 
-    with st.expander("SEIRDVF Model Documentation", expanded=False):
+    with st.expander("SEIRDVFB Model Documentation", expanded=False):
         st.markdown("""
         <style>
         .documentation {
@@ -28,8 +27,8 @@ def main():
 
         st.markdown("""
         <div class="documentation">
-        <h2>SEIRDVF Model Documentation</h2>
-        <p>This app allows you to simulate the SEIRDVF model for epidemic spread. Adjust parameters using the sidebar and view the results in real-time.</p>
+        <h2>SEIRDVFB Model Documentation</h2>
+        <p>This app allows you to simulate the SEIRDVFB model for epidemic spread. Adjust parameters using the sidebar and view the results in real-time.</p>
         <h3>Parameters</h3>
         <ul>
             <li><b>β</b>: Transmission coefficient</li>
@@ -40,6 +39,9 @@ def main():
             <li><b>ω</b>: Waning immunity rate</li>
             <li><b>κ</b>: Rate to funeral component</li>
             <li><b>φ</b>: Funeral transmission rate</li>
+            <li><b>β_HV</b>: Human-to-bat transmission rate</li>
+            <li><b>β_VH</b>: Bat-to-human transmission rate</li>
+            <li><b>γ_b</b>: Bat recovery rate</li>
         </ul>
         <h3>Initial Conditions</h3>
         <p>Adjust the initial number of individuals in each compartment:</p>
@@ -51,6 +53,9 @@ def main():
             <li>Deceased (D)</li>
             <li>Vaccinated (V)</li>
             <li>Funeral (F)</li>
+            <li>Susceptible Bats (S_b)</li>
+            <li>Infectious Bats (I_b)</li>
+            <li>Recovered Bats (R_b)</li>
         </ul>
         <h3>Scenarios</h3>
         <p>Choose a scenario to explore:</p>
@@ -60,18 +65,21 @@ def main():
             <li><b>Custom Scenario</b>: Design a scenario that investigates an additional factor or intervention of your choice.</li>
         </ul>
         <h3>Model Equations</h3>
-        <p>The SEIRDVF model is described by the following system of ordinary differential equations (ODEs):</p>
+        <p>The SEIRDVFB model is described by the following system of ordinary differential equations (ODEs):</p>
         """, unsafe_allow_html=True)
 
         st.latex(r"""
         \begin{aligned}
-        \frac{dS}{dt} &= - \beta \frac{S (I + \phi F)}{N} - \nu S + \omega R + \omega V \\
+        \frac{dS}{dt} &= - \beta \frac{S (I + \phi F)}{N} - \nu S + \omega R + \omega V - \beta_{HV} \frac{S I_b}{N} \\
         \frac{dE}{dt} &= \beta \frac{S (I + \phi F)}{N} - \sigma E \\
         \frac{dI}{dt} &= \sigma E - \gamma I - \delta I \\
         \frac{dR}{dt} &= \gamma I - \omega R \\
         \frac{dD}{dt} &= \kappa F \\
         \frac{dV}{dt} &= \nu S - \omega V \\
         \frac{dF}{dt} &= \delta I - \kappa F \\
+        \frac{dS_b}{dt} &= - \beta_{VH} \frac{S_b I}{N} \\
+        \frac{dI_b}{dt} &= \beta_{VH} \frac{S_b I}{N} - \gamma_b I_b \\
+        \frac{dR_b}{dt} &= \gamma_b I_b \\
         \end{aligned}
         """)
 
@@ -99,7 +107,10 @@ def main():
             "nu": 0.05,
             "omega": 0.01,
             "kappa": 0.05,
-            "phi": 0.05
+            "phi": 0.05,
+            "beta_HV": 0.1,
+            "beta_VH": 0.1,
+            "gamma_b": 0.05
         },
         "Seasonal Variation": {
             "beta": 0.3,
@@ -109,7 +120,10 @@ def main():
             "nu": 0.05,
             "omega": 0.01,
             "kappa": 0.05,
-            "phi": 0.05
+            "phi": 0.05,
+            "beta_HV": 0.1,
+            "beta_VH": 0.1,
+            "gamma_b": 0.05
         },
         "Funerary Transmission": {
             "beta": 0.3,
@@ -119,7 +133,10 @@ def main():
             "nu": 0.05,
             "omega": 0.01,
             "kappa": 0.05,
-            "phi": 0.05
+            "phi": 0.05,
+            "beta_HV": 0.1,
+            "beta_VH": 0.1,
+            "gamma_b": 0.05
         },
         "Safe and Dignified Burials": {
             "beta": 0.3,
@@ -129,7 +146,10 @@ def main():
             "nu": 0.05,
             "omega": 0.01,
             "kappa": 0.05,
-            "phi": 0.01
+            "phi": 0.01,
+            "beta_HV": 0.1,
+            "beta_VH": 0.1,
+            "gamma_b": 0.05
         }
     }
 
@@ -144,7 +164,10 @@ def main():
         "nu": "ν (Vaccination rate)",
         "omega": "ω (Waning immunity rate)",
         "kappa": "κ (Rate to funeral component)",
-        "phi": "φ (Funeral transmission rate)"
+        "phi": "φ (Funeral transmission rate)",
+        "beta_HV": "β_HV (Human-to-bat transmission rate)",
+        "beta_VH": "β_VH (Bat-to-human transmission rate)",
+        "gamma_b": "γ_b (Bat recovery rate)"
     }
 
     for param, value in params.items():
@@ -165,6 +188,9 @@ def main():
         "D": st.sidebar.number_input("Initial Deceased (D)", value=0),
         "V": st.sidebar.number_input("Initial Vaccinated (V)", value=0),
         "F": st.sidebar.number_input("Initial Funeral (F)", value=0),
+        "S_b": st.sidebar.number_input("Initial Susceptible Bats (S_b)", value=9990),
+        "I_b": st.sidebar.number_input("Initial Infectious Bats (I_b)", value=10),
+        "R_b": st.sidebar.number_input("Initial Recovered Bats (R_b)", value=0)
     }
 
     days = st.sidebar.number_input("Number of Days for Simulation", value=160)
@@ -220,7 +246,7 @@ def main():
 
     with st.expander("Tutorial"):
         st.write("""
-        ### How to Use the SEIRDVF Model App
+        ### How to Use the SEIRDVFB Model App
         1. **Adjust Parameters**: Use the sliders and number inputs in the sidebar to set the parameters and initial conditions.
         2. **Select a Scenario**: Choose from Hospital Capacity, Seasonal Variation, or Custom Scenario.
         3. **Run Simulation**: Click the "Run Simulation" button to execute the model and visualize the results.
