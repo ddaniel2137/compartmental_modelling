@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SEIRDVF Epidemiological Model and Scenarios</title>
+</head>
+<body>
+    <h1>SEIRDVF Epidemiological Model and Scenarios</h1>
+
+    <h2>Overview of the SEIRDVF Model</h2>
+    <p>
+        The SEIRDVF model is an extension of the classic SEIR model, incorporating additional compartments to account for Vaccinated (V) and Funeral (F) states. This model is designed to simulate the spread of infectious diseases and evaluate the impact of various interventions.
+    </p>
+
+    <h3>Model Compartments</h3>
+    <ul>
+        <li><strong>Susceptible (S):</strong> Individuals who are susceptible to the infection.</li>
+        <li><strong>Exposed (E):</strong> Individuals who have been exposed to the infection but are not yet infectious.</li>
+        <li><strong>Infectious (I):</strong> Individuals who are currently infectious.</li>
+        <li><strong>Recovered (R):</strong> Individuals who have recovered from the infection and gained immunity.</li>
+        <li><strong>Deceased (D):</strong> Individuals who have died from the infection.</li>
+        <li><strong>Vaccinated (V):</strong> Individuals who have been vaccinated and are immune to the infection.</li>
+        <li><strong>Funeral (F):</strong> Individuals who have died and are in the funeral process, potentially contributing to further transmission.</li>
+    </ul>
+
+    <h3>Model Equations</h3>
+    <p>The SEIRDVF model is described by the following system of ordinary differential equations (ODEs):</p>
+    <img src="https://latex.codecogs.com/svg.image?\begin{aligned}\frac{dS}{dt}&space;&=&space;-&space;\beta&space;\frac{S&space;(I&space;+&space;\phi&space;F)}{N}&space;-&space;\nu&space;S&space;+&space;\omega&space;R&space;+&space;\omega&space;V&space;\\\frac{dE}{dt}&space;&=&space;\beta&space;\frac{S&space;(I&space;+&space;\phi&space;F)}{N}&space;-&space;\sigma&space;E&space;\\\frac{dI}{dt}&space;&=&space;\sigma&space;E&space;-&space;\gamma&space;I&space;-&space;\delta&space;I&space;\\\frac{dR}{dt}&space;&=&space;\gamma&space;I&space;-&space;\omega&space;R&space;\\\frac{dD}{dt}&space;&=&space;\kappa&space;F&space;\\\frac{dV}{dt}&space;&=&space;\nu&space;S&space;-&space;\omega&space;V&space;\\\frac{dF}{dt}&space;&=&space;\delta&space;I&space;-&space;\kappa&space;F&space;\\\end{aligned}" alt="SEIRDVF Model Equations" />
+
+
+    <h3>Parameters</h3>
+    <ul>
+        <li><strong>β (beta):</strong> Transmission coefficient</li>
+        <li><strong>σ (sigma):</strong> Rate at which exposed individuals become infectious</li>
+        <li><strong>γ (gamma):</strong> Recovery rate</li>
+        <li><strong>δ (delta):</strong> Disease-induced death rate</li>
+        <li><strong>ν (nu):</strong> Vaccination rate</li>
+        <li><strong>ω (omega):</strong> Waning immunity rate</li>
+        <li><strong>κ (kappa):</strong> Rate to funeral component</li>
+        <li><strong>φ (phi):</strong> Funeral transmission rate</li>
+    </ul>
+
+    <h2>Scenarios</h2>
+    <p>The SEIRDVF model allows users to explore various scenarios to understand the dynamics of disease spread under different conditions. The following scenarios are available:</p>
+
+    <h3>Hospital Capacity</h3>
+    <p>
+        This scenario ensures that hospitals are not overwhelmed by the number of infected people. Users can adjust the transmission coefficient (β) to ensure that the peak number of infections does not exceed the hospital capacity.
+    </p>
+
+    <h3>Seasonal Variation</h3>
+    <p>
+        This scenario investigates how the epidemic would evolve with seasonal variations in transmission rates. The transmission coefficient (β) is modeled as a time-dependent parameter that varies sinusoidally over the year.
+    </p>
+
+    <h3>Custom Scenario</h3>
+    <p>
+        This scenario allows users to design a custom scenario that investigates an additional factor or intervention of their choice. Users can adjust the model parameters and initial conditions to explore the impact of different interventions.
+    </p>
+
+    <h2>How to Use the SEIRDVF Model App</h2>
+    <ol>
+        <li>Adjust the parameters and initial conditions using the sidebar in the Streamlit app.</li>
+        <li>Select a scenario from the dropdown menu.</li>
+        <li>Click "Run Simulation" to see the results of the SEIRDVF model with the specified parameters.</li>
+        <li>Examine the interactive plots to understand how the disease dynamics evolve over time.</li>
+    </ol>
+
+    <h2>Visualization</h2>
+    <p>
+        The results of the SEIRDVF model are displayed as interactive plots. Users can hover over the lines to see specific values and use the toolbar for zooming and panning. The plots show the dynamics of the different compartments (Susceptible, Exposed, Infected, Recovered, Deceased, Vaccinated, Funeral) over time.
+    </p>
+</body>
+</html>

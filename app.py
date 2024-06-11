@@ -9,114 +9,143 @@ import pandas as pd
 def main():
     st.title("SEIRDVF Epidemic Model Simulation")
 
-    st.markdown("""
-    # SEIRDVF Model Documentation
-    This app allows you to simulate the SEIRDVF model for epidemic spread. Adjust parameters using the sidebar and view the results in real-time.
-    ## Parameters
-    - **β**: Transmission coefficient
-    - **σ**: Rate at which exposed individuals become infectious
-    - **γ**: Recovery rate
-    - **μ**: Natural death rate
-    - **δ**: Disease-induced death rate
-    - **ν**: Vaccination rate
-    - **ω**: Waning immunity rate
-    - **κ**: Rate to funeral component
-    - **φ**: Funeral transmission rate
+    with st.expander("SEIRDVF Model Documentation", expanded=False):
+        st.markdown("""
+        <style>
+        .documentation {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+        }
+        .documentation h2 {
+            color: #2C3E50;
+        }
+        .documentation ul {
+            list-style-type: disc;
+            margin-left: 20px;
+        }
+        </style>
+        """, unsafe_allow_html=True)
 
-    ## Initial Conditions
-    Adjust the initial number of individuals in each compartment:
-    - Susceptible (S)
-    - Exposed (E)
-    - Infectious (I)
-    - Recovered (R)
-    - Deceased (D)
-    - Vaccinated (V)
-    - Funeral (F)
+        st.markdown("""
+        <div class="documentation">
+        <h2>SEIRDVF Model Documentation</h2>
+        <p>This app allows you to simulate the SEIRDVF model for epidemic spread. Adjust parameters using the sidebar and view the results in real-time.</p>
+        <h3>Parameters</h3>
+        <ul>
+            <li><b>β</b>: Transmission coefficient</li>
+            <li><b>σ</b>: Rate at which exposed individuals become infectious</li>
+            <li><b>γ</b>: Recovery rate</li>
+            <li><b>δ</b>: Disease-induced death rate</li>
+            <li><b>ν</b>: Vaccination rate</li>
+            <li><b>ω</b>: Waning immunity rate</li>
+            <li><b>κ</b>: Rate to funeral component</li>
+            <li><b>φ</b>: Funeral transmission rate</li>
+        </ul>
+        <h3>Initial Conditions</h3>
+        <p>Adjust the initial number of individuals in each compartment:</p>
+        <ul>
+            <li>Susceptible (S)</li>
+            <li>Exposed (E)</li>
+            <li>Infectious (I)</li>
+            <li>Recovered (R)</li>
+            <li>Deceased (D)</li>
+            <li>Vaccinated (V)</li>
+            <li>Funeral (F)</li>
+        </ul>
+        <h3>Scenarios</h3>
+        <p>Choose a scenario to explore:</p>
+        <ul>
+            <li><b>Hospital Capacity</b>: Ensure hospitals are not overwhelmed by the number of infected people.</li>
+            <li><b>Seasonal Variation</b>: Investigate how the epidemic would evolve with seasonal variations in transmission rates.</li>
+            <li><b>Custom Scenario</b>: Design a scenario that investigates an additional factor or intervention of your choice.</li>
+        </ul>
+        <h3>Model Equations</h3>
+        <p>The SEIRDVF model is described by the following system of ordinary differential equations (ODEs):</p>
+        """, unsafe_allow_html=True)
 
-    ## Scenarios
-    Choose a scenario to explore:
-    - **High Transmission**: High transmission and low recovery rate.
-    - **Effective Vaccination**: High vaccination rate.
-    - **Seasonal Variation**: Seasonal variations in transmission rates.
-    - **High Natural Death Rate**: High natural death rate.
-    - **Waning Immunity**: Significant waning immunity.
+        st.latex(r"""
+        \begin{aligned}
+        \frac{dS}{dt} &= - \beta \frac{S (I + \phi F)}{N} - \nu S + \omega R + \omega V \\
+        \frac{dE}{dt} &= \beta \frac{S (I + \phi F)}{N} - \sigma E \\
+        \frac{dI}{dt} &= \sigma E - \gamma I - \delta I \\
+        \frac{dR}{dt} &= \gamma I - \omega R \\
+        \frac{dD}{dt} &= \kappa F \\
+        \frac{dV}{dt} &= \nu S - \omega V \\
+        \frac{dF}{dt} &= \delta I - \kappa F \\
+        \end{aligned}
+        """)
 
-    ### How to Use
-    1. Adjust the parameters and initial conditions using the sidebar.
-    2. Select a scenario from the dropdown.
-    3. Click "Run Simulation" to see the results.
-
-    ### Visualization
-    The results are displayed as interactive plots. You can hover over the lines to see specific values and use the toolbar for zooming and panning.
-    """)
+        st.markdown("""
+        <h3>How to Use</h3>
+        <ol>
+            <li>Adjust the parameters and initial conditions using the sidebar.</li>
+            <li>Select a scenario from the dropdown.</li>
+            <li>Click "Run Simulation" to see the results.</li>
+        </ol>
+        <h3>Visualization</h3>
+        <p>The results are displayed as interactive plots. You can hover over the lines to see specific values and use the toolbar for zooming and panning.</p>
+        </div>
+        """, unsafe_allow_html=True)
 
     st.sidebar.header("Model Parameters")
-    scenario = st.sidebar.selectbox("Select Scenario", ["High Transmission", "Effective Vaccination", "Seasonal Variation", "High Natural Death Rate", "Waning Immunity"])
+    scenario = st.sidebar.selectbox("Select Scenario", ["Hospital Capacity", "Seasonal Variation", "Custom Scenario"])
 
-    if scenario == "High Transmission":
-        params = {
-            "beta": 0.8,
-            "sigma": 0.2,
-            "gamma": 0.05,
-            "mu": 0.01,
-            "delta": 0.1,
-            "nu": 0.01,
-            "omega": 0.01,
-            "kappa": 0.05,
-            "phi": 0.05
-        }
-    elif scenario == "Effective Vaccination":
-        params = {
+    default_params = {
+        "Hospital Capacity": {
             "beta": 0.3,
             "sigma": 0.2,
             "gamma": 0.1,
-            "mu": 0.01,
-            "delta": 0.05,
-            "nu": 0.3,
-            "omega": 0.01,
-            "kappa": 0.05,
-            "phi": 0.02
-        }
-    elif scenario == "Seasonal Variation":
-        params = {
-            "beta": 0.5,
-            "sigma": 0.2,
-            "gamma": 0.1,
-            "mu": 0.01,
             "delta": 0.05,
             "nu": 0.05,
             "omega": 0.01,
             "kappa": 0.05,
             "phi": 0.05
-        }
-        time_dependent_params = {
-            'beta': lambda t: 0.5 * (1 + 0.3 * np.sin(2 * np.pi * t / 365))
-        }
-    elif scenario == "High Natural Death Rate":
-        params = {
+        },
+        "Seasonal Variation": {
             "beta": 0.3,
             "sigma": 0.2,
             "gamma": 0.1,
-            "mu": 0.05,
+            "delta": 0.05,
+            "nu": 0.05,
+            "omega": 0.01,
+            "kappa": 0.05,
+            "phi": 0.05
+        },
+        "Custom Scenario": {
+            "beta": 0.3,
+            "sigma": 0.2,
+            "gamma": 0.1,
             "delta": 0.05,
             "nu": 0.05,
             "omega": 0.01,
             "kappa": 0.05,
             "phi": 0.05
         }
-    elif scenario == "Waning Immunity":
-        params = {
-            "beta": 0.4,
-            "sigma": 0.2,
-            "gamma": 0.1,
-            "mu": 0.01,
-            "delta": 0.05,
-            "nu": 0.05,
-            "omega": 0.1,
-            "kappa": 0.05,
-            "phi": 0.05
-        }
-    
+    }
+
+    params = default_params[scenario]
+
+    st.sidebar.header("Adjust Parameters")
+    param_explanations = {
+        "beta": "β (Transmission coefficient)",
+        "sigma": "σ (Rate at which exposed individuals become infectious)",
+        "gamma": "γ (Recovery rate)",
+        "delta": "δ (Disease-induced death rate)",
+        "nu": "ν (Vaccination rate)",
+        "omega": "ω (Waning immunity rate)",
+        "kappa": "κ (Rate to funeral component)",
+        "phi": "φ (Funeral transmission rate)"
+    }
+
+    for param, value in params.items():
+        if scenario == "Hospital Capacity" and param not in ["beta"]:
+            st.sidebar.write(f"{param_explanations[param]}: {value}")
+        elif scenario == "Seasonal Variation" and param not in ["beta"]:
+            st.sidebar.write(f"{param_explanations[param]}: {value}")
+        else:
+            params[param] = st.sidebar.slider(f"{param_explanations[param]}", min_value=0.0, max_value=1.0, value=value, step=0.01)
+            st.sidebar.write(f"Current {param_explanations[param]}: {params[param]}")
+
     st.sidebar.header("Initial Conditions")
     initial_conditions = {
         "S": st.sidebar.number_input("Initial Susceptible (S)", value=9990),
@@ -128,12 +157,25 @@ def main():
         "F": st.sidebar.number_input("Initial Funeral (F)", value=0),
     }
 
+    days = st.sidebar.number_input("Number of Days for Simulation", value=160)
+
     if st.sidebar.button("Run Simulation"):
-        if scenario == "Seasonal Variation":
-            results = run_simulation(params, initial_conditions, time_dependent_params=time_dependent_params)
-        else:
-            results = run_simulation(params, initial_conditions)
-        plot_results(results)
+        if scenario == "Hospital Capacity":
+            hospital_capacity = 0.1 * sum(initial_conditions.values())
+            results = run_simulation(params, initial_conditions, days)
+            peak_infections = max(results['I'])
+            if peak_infections > hospital_capacity:
+                st.warning(f"Warning: Peak infections ({peak_infections}) exceed hospital capacity ({hospital_capacity})")
+            plot_results(results)
+        elif scenario == "Seasonal Variation":
+            time_dependent_params = {
+                'beta': lambda t: params['beta'] * (1 + 0.3 * np.sin(2 * np.pi * t / 365))
+            }
+            results = run_simulation(params, initial_conditions, days, time_dependent_params=time_dependent_params)
+            plot_results(results)
+        elif scenario == "Custom Scenario":
+            results = run_simulation(params, initial_conditions, days)
+            plot_results(results)
         plot_scenarios(scenario, params, initial_conditions)
 
     st.sidebar.header("Optimization")
@@ -144,7 +186,7 @@ def main():
         st.write("Real-world data uploaded.")
 
     if st.sidebar.button("Generate Synthetic Data"):
-        synthetic_data = generate_synthetic_data(params, initial_conditions, 160)
+        synthetic_data = generate_synthetic_data(params, initial_conditions, days)
         st.session_state.synthetic_data = synthetic_data
         st.write("Synthetic data generated.")
 
@@ -152,7 +194,7 @@ def main():
         if 'observed_data' in st.session_state:
             observed_data = st.session_state.observed_data
             initial_guess = [params[key] for key in params]
-            estimated_params = estimate_parameters(observed_data, initial_guess, initial_conditions, method='minimize')
+            estimated_params = estimate_parameters(observed_data, initial_guess, initial_conditions)
             st.write(f"Estimated Parameters: {estimated_params}")
         else:
             st.write("Please upload real-world data first.")
@@ -161,7 +203,7 @@ def main():
         st.write("""
         ### How to Use the SEIRDVF Model App
         1. **Adjust Parameters**: Use the sliders and number inputs in the sidebar to set the parameters and initial conditions.
-        2. **Select a Scenario**: Choose from Default, Hospital Capacity, Seasonal Variation, or Custom scenarios.
+        2. **Select a Scenario**: Choose from Hospital Capacity, Seasonal Variation, or Custom Scenario.
         3. **Run Simulation**: Click the "Run Simulation" button to execute the model and visualize the results.
         4. **Generate Synthetic Data**: Click the "Generate Synthetic Data" button to create data for testing the optimization.
         5. **Estimate Parameters**: Click the "Estimate Parameters" button to optimize and find the best-fit parameters based on the synthetic data.
