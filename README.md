@@ -1,9 +1,9 @@
 
-# SEIRDVF Epidemic Model Simulation
+# SEIRDVFB Epidemic Model Simulation
 
 ## Overview
 
-This repository contains an implementation of the SEIRDVF compartmental model for simulating the spread of infectious diseases, particularly focusing on the Ebola epidemic. The SEIRDVF model includes the following compartments: Susceptible (S), Exposed (E), Infectious (I), Recovered (R), Deceased (D), Vaccinated (V), and Funeral (F).
+This repository contains an implementation of the SEIRDVFB compartmental model for simulating the spread of infectious diseases, particularly focusing on the Ebola epidemic. The SEIRDVFB model includes the following compartments: Susceptible (S), Exposed (E), Infectious (I), Recovered (R), Deceased (D), Vaccinated (V), Funeral (F), Susceptible Bats (S_b), Infectious Bats (I_b), and Recovered Bats (R_b).
 
 This project aims to model complex transmission dynamics, including the effects of social behaviors, seasonal variations, vaccination strategies, and waning immunity. The implementation allows for advanced parameter estimation using real-world data and optimization techniques.
 
@@ -17,28 +17,24 @@ This project aims to model complex transmission dynamics, including the effects 
 ## Installation
 
 1. Clone the repository:
-    ```bash
-    git clone https://github.com/ddaniel2137/compartmental_modelling.git
-    cd SEIRDVF_Model
-    ```
+
+   git clone https://github.com/ddaniel2137/compartmental_modelling.git
+   cd SEIRDVFB_Model
 
 2. Create a virtual environment:
-    ```bash
-    python3.12 -m venv venv
-    source venv/bin/activate   # On Windows, use `venv\Scripts\activate`
-    ```
+
+   python3.12 -m venv venv
+   source venv/bin/activate # On Windows, use `venv\Scripts\activate`
 
 3. Install the required packages:
-    ```bash
-    pip install -r requirements.txt
-    ```
+
+   pip install -r requirements.txt
 
 ## Running the Application
 
 To run the Streamlit application, use the following command:
-```bash
+
 streamlit run app.py
-```
 
 You can access the application in your web browser at `http://localhost:8501`.
 
@@ -47,8 +43,8 @@ You can access the application in your web browser at `http://localhost:8501`.
 ### Adjust Parameters
 
 - **Model Parameters**: Use the sidebar to adjust model parameters such as transmission coefficient (β), recovery rate (γ), vaccination rate (ν), etc.
-- **Initial Conditions**: Set the initial number of individuals in each compartment (S, E, I, R, D, V, F).
-- **Scenarios**: Select from predefined scenarios including High Transmission, Effective Vaccination, Seasonal Variation, High Natural Death Rate, and Waning Immunity.
+- **Initial Conditions**: Set the initial number of individuals in each compartment (S, E, I, R, D, V, F, S_b, I_b, R_b).
+- **Scenarios**: Select from predefined scenarios including Hospital Capacity, Seasonal Variation, Funerary Transmission, and Safe and Dignified Burials.
 
 ### Running Simulations
 
@@ -64,27 +60,31 @@ You can access the application in your web browser at `http://localhost:8501`.
 
 ## Model Description
 
-The SEIRDVF model is defined by the following differential equations:
+The SEIRDVFB model is defined by the following differential equations:
 
-```
-dS/dt = μN - βS(I + φF)/N - νS + ωR + ωV - μS
-dE/dt = βS(I + φF)/N - σE - μE
-dI/dt = σE - γI - δI - μI
-dR/dt = γI - ωR - μR
-dD/dt = δI - κD
-dV/dt = νS - ωV - μV
-dF/dt = κD - φF
-```
+\begin{aligned}
+\frac{dS}{dt} &= - \beta \frac{S (I + \phi F)}{N} - \nu S + \omega R + \omega V - \beta*{HV} \frac{S I_b}{N} \\
+\frac{dE}{dt} &= \beta \frac{S (I + \phi F)}{N} - \sigma E \\
+\frac{dI}{dt} &= \sigma E - \gamma I - \delta I \\
+\frac{dR}{dt} &= \gamma I - \omega R \\
+\frac{dD}{dt} &= \kappa F \\
+\frac{dV}{dt} &= \nu S - \omega V \\
+\frac{dF}{dt} &= \delta I - \kappa F \\
+\frac{dS_b}{dt} &= - \beta*{VH} \frac{S*b I}{N} \\
+\frac{dI_b}{dt} &= \beta*{VH} \frac{S_b I}{N} - \gamma_b I_b \\
+\frac{dR_b}{dt} &= \gamma_b I_b \\
+\end{aligned}
 
 ### Parameters
 
 - **β**: Transmission coefficient
 - **σ**: Rate at which exposed individuals become infectious
 - **γ**: Recovery rate
-- **μ**: Natural death rate
 - **δ**: Disease-induced death rate
 - **ν**: Vaccination rate
 - **ω**: Waning immunity rate
 - **κ**: Rate at which deceased individuals are moved to the funeral component
 - **φ**: Rate at which funerals contribute to new infections
-
+- **β_HV**: Human-to-bat transmission rate
+- **β_VH**: Bat-to-human transmission rate
+- **γ_b**: Bat recovery rate

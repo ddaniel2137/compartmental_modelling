@@ -319,15 +319,15 @@ Now, we can invoke the solver. For the purposes of this demonstration, we will s
 
 You do not have to specify max_step; the solver will try to guess an appropriate value. However, this typically is fairly parsimonious and the resulting curves can look quite choppy.
 
-$$
-\begin{aligned}
-\text { res }=\text { solve_ivp( } & \text { fun=deriv, } \\
-& \text { t_span }=(0,100), \\
-& y 0=y \_0, \\
-& \text { args=(beta, gamma), } \\
-& \text { aax_step=1) }
-\end{aligned}
-$$
+```
+res = solve_ivp(
+    fun=deriv,
+    t_span=(0, 100),
+    y0=y_0,
+    args=(beta, gamma),
+    max_step=1
+)
+```
 
 The solver returns an 0deResult object. This provides several attributes, the most important of which are the following:
 
