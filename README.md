@@ -1,94 +1,90 @@
 
-# SEIRV Epidemiology Modeling Project
+# SEIRDVF Epidemic Model Simulation
 
 ## Overview
-This project models and analyzes various aspects of epidemic outbreaks using the SEIRV (Susceptible, Exposed, Infected, Recovered, Vaccinated) framework. It includes a rich graphical user interface (GUI) built with Streamlit and uses Gurobi for optimization. Users can explore various scenarios and compartments to understand the dynamics of disease spread.
 
-## Project Structure
-```
-SEIRV_Modeling_Project/
-│
-├── data/
-│   ├── synthetic_data.csv          # Synthetic data generated for model validation
-│   ├── real_world_data.csv         # (Optional) Real-world data for model comparison
-│
-├── notebooks/
-│   ├── exploration.ipynb           # Jupyter notebook for exploratory data analysis
-│   ├── optimization.ipynb          # Jupyter notebook for testing optimization
-│
-├── src/
-│   ├── __init__.py                 # Initialize the src package
-│   ├── seirv_model.py              # SEIRV model implementation
-│   ├── data_generation.py          # Data generation functions
-│   ├── optimization.py             # Optimization functions using Gurobi
-│   ├── visualization.py            # Functions for plotting and visualizations
-│   ├── streamlit_app.py            # Main Streamlit app
-│
-├── tests/
-│   ├── test_seirv_model.py         # Unit tests for the SEIRV model
-│   ├── test_data_generation.py     # Unit tests for data generation
-│   ├── test_optimization.py        # Unit tests for optimization functions
-│
-├── README.md                       # Project overview and instructions
-├── requirements.txt                # Required libraries and dependencies
-├── setup.py                        # Setup script for packaging and installation
-└── LICENSE                         # License for the project
-```
+This repository contains an implementation of the SEIRDVF compartmental model for simulating the spread of infectious diseases, particularly focusing on the Ebola epidemic. The SEIRDVF model includes the following compartments: Susceptible (S), Exposed (E), Infectious (I), Recovered (R), Deceased (D), Vaccinated (V), and Funeral (F).
+
+This project aims to model complex transmission dynamics, including the effects of social behaviors, seasonal variations, vaccination strategies, and waning immunity. The implementation allows for advanced parameter estimation using real-world data and optimization techniques.
+
+## Features
+
+- **Dynamic Transmission Rates**: Incorporates detailed social interaction parameters and seasonal variations.
+- **Advanced Parameter Estimation**: Utilizes optimization techniques such as `minimize`, `least_squares`, and `differential_evolution` for parameter estimation.
+- **Real-World Data Integration**: Allows for uploading real-world data to validate and adjust model parameters.
+- **Streamlit Interface**: Provides an interactive interface for adjusting parameters, running simulations, and visualizing results.
 
 ## Installation
 
-1. **Clone the repository:**
-   ```bash
-   git clone <repository-url>
-   cd SEIRV_Modeling_Project
-   ```
+1. Clone the repository:
+    ```bash
+    git clone https://github.com/ddaniel2137/compartmental_modelling.git
+    cd SEIRDVF_Model
+    ```
 
-2. **Set up a virtual environment (optional but recommended):**
-   ```bash
-   python3 -m venv venv
-   source venv/bin/activate   # On Windows use `venv\Scriptsctivate`
-   ```
+2. Create a virtual environment:
+    ```bash
+    python3.12 -m venv venv
+    source venv/bin/activate   # On Windows, use `venv\Scripts\activate`
+    ```
 
-3. **Install the required packages:**
-   ```bash
-   pip install -r requirements.txt
-   ```
+3. Install the required packages:
+    ```bash
+    pip install -r requirements.txt
+    ```
 
-## Running the Project
+## Running the Application
 
-1. **Navigate to the `src` directory:**
-   ```bash
-   cd src
-   ```
+To run the Streamlit application, use the following command:
+```bash
+streamlit run app.py
+```
 
-2. **Run the Streamlit app:**
-   ```bash
-   streamlit run streamlit_app.py
-   ```
-
-3. **Open your web browser and go to the provided URL (typically `http://localhost:8501`):**
+You can access the application in your web browser at `http://localhost:8501`.
 
 ## Usage
 
-- **Adjust Model Parameters:** Use the sidebar in the Streamlit app to adjust the parameters such as transmission rate, progression rate, recovery rate, mortality rate, and vaccination rate.
-- **Run Simulation:** Click the "Run Simulation" button to see the results of the SEIRV model with the specified parameters.
-- **View Results:** The app will display the results in the form of interactive plots showing the dynamics of the different compartments (Susceptible, Exposed, Infected, Recovered, Vaccinated) over time.
+### Adjust Parameters
 
-## Project Components
+- **Model Parameters**: Use the sidebar to adjust model parameters such as transmission coefficient (β), recovery rate (γ), vaccination rate (ν), etc.
+- **Initial Conditions**: Set the initial number of individuals in each compartment (S, E, I, R, D, V, F).
+- **Scenarios**: Select from predefined scenarios including High Transmission, Effective Vaccination, Seasonal Variation, High Natural Death Rate, and Waning Immunity.
 
-- **`data/`:** Contains synthetic data generated for model validation and (optionally) real-world data for comparison.
-- **`notebooks/`:** Jupyter notebooks for exploratory data analysis and optimization testing.
-- **`src/`:** Source code for the model, data generation, optimization, visualization, and the Streamlit app.
-- **`tests/`:** Unit tests for different components of the project.
+### Running Simulations
 
-## License
+1. Adjust the parameters and initial conditions using the sidebar.
+2. Select a scenario from the dropdown.
+3. Click "Run Simulation" to execute the model and visualize the results.
 
-This project is licensed under the MIT License.
+### Optimization
 
-## Contributing
+1. **Generate Synthetic Data**: Click the "Generate Synthetic Data" button to create data for testing the optimization.
+2. **Upload Real-World Data**: Upload a CSV file containing real-world data for parameter estimation.
+3. **Estimate Parameters**: Click the "Estimate Parameters" button to optimize and find the best-fit parameters based on the provided data.
 
-Contributions are welcome! Please open an issue or submit a pull request.
+## Model Description
 
-## Contact
+The SEIRDVF model is defined by the following differential equations:
 
-If you have any questions or need further assistance, please contact [Your Name] at [Your Email].
+```
+dS/dt = μN - βS(I + φF)/N - νS + ωR + ωV - μS
+dE/dt = βS(I + φF)/N - σE - μE
+dI/dt = σE - γI - δI - μI
+dR/dt = γI - ωR - μR
+dD/dt = δI - κD
+dV/dt = νS - ωV - μV
+dF/dt = κD - φF
+```
+
+### Parameters
+
+- **β**: Transmission coefficient
+- **σ**: Rate at which exposed individuals become infectious
+- **γ**: Recovery rate
+- **μ**: Natural death rate
+- **δ**: Disease-induced death rate
+- **ν**: Vaccination rate
+- **ω**: Waning immunity rate
+- **κ**: Rate at which deceased individuals are moved to the funeral component
+- **φ**: Rate at which funerals contribute to new infections
+
