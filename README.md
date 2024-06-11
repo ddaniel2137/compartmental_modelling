@@ -62,18 +62,31 @@ You can access the application in your web browser at `http://localhost:8501`.
 
 The SEIRDVFB model is defined by the following differential equations:
 
+## Model Description
+
+The SEIRDVFB model is defined by the following differential equations:
+
+## Model Description
+
+The SEIRDVFB model is defined by the following differential equations:
+
+$$
 \begin{aligned}
-\frac{dS}{dt} &= - \beta \frac{S (I + \phi F)}{N} - \nu S + \omega R + \omega V - \beta*{HV} \frac{S I_b}{N} \\
-\frac{dE}{dt} &= \beta \frac{S (I + \phi F)}{N} - \sigma E \\
-\frac{dI}{dt} &= \sigma E - \gamma I - \delta I \\
-\frac{dR}{dt} &= \gamma I - \omega R \\
-\frac{dD}{dt} &= \kappa F \\
-\frac{dV}{dt} &= \nu S - \omega V \\
-\frac{dF}{dt} &= \delta I - \kappa F \\
-\frac{dS_b}{dt} &= - \beta*{VH} \frac{S*b I}{N} \\
-\frac{dI_b}{dt} &= \beta*{VH} \frac{S_b I}{N} - \gamma_b I_b \\
-\frac{dR_b}{dt} &= \gamma_b I_b \\
+\frac{d\mathrm{S}}{dt} &= - \beta \frac{\mathrm{S} (\mathrm{I} + \phi \mathrm{F})}{\mathrm{N}} - \nu \mathrm{S} + \omega \mathrm{R} + \omega \mathrm{V} - \beta_{HV} \frac{\mathrm{S} \mathrm{I_b}}{\mathrm{N}} \\
+\frac{d\mathrm{E}}{dt} &= \beta \frac{\mathrm{S} (\mathrm{I} + \phi \mathrm{F})}{\mathrm{N}} - \sigma \mathrm{E} \\
+\frac{d\mathrm{I}}{dt} &= \sigma \mathrm{E} - \gamma \mathrm{I} - \delta \mathrm{I} \\
+\frac{d\mathrm{R}}{dt} &= \gamma \mathrm{I} - \omega \mathrm{R} \\
+\frac{d\mathrm{D}}{dt} &= \kappa \mathrm{F} \\
+\frac{d\mathrm{V}}{dt} &= \nu \mathrm{S} - \omega \mathrm{V} \\
+\frac{d\mathrm{F}}{dt} &= \delta \mathrm{I} - \kappa \mathrm{F} \\
+\frac{d\mathrm{S_b}}{dt} &= - \beta_{VH} \frac{\mathrm{S_b} \mathrm{I}}{\mathrm{N}} \\
+\frac{d\mathrm{I_b}}{dt} &= \beta_{VH} \frac{\mathrm{S_b} \mathrm{I}}{\mathrm{N}} - \gamma_b \mathrm{I_b} \\
+\frac{d\mathrm{R_b}}{dt} &= \gamma_b \mathrm{I_b} \\
 \end{aligned}
+$$
+
+
+
 
 ### Parameters
 
