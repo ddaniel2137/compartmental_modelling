@@ -4,11 +4,11 @@ from src.simulation import run_simulation
 from src.visualization import plot_results, plot_scenarios
 from src.utils import generate_synthetic_data, estimate_parameters
 import numpy as np
-
+import pandas as pd
 
 def main():
     st.title("SEIRDVF Epidemic Model Simulation")
-    
+
     st.markdown("""
     # SEIRDVF Model Documentation
     This app allows you to simulate the SEIRDVF model for epidemic spread. Adjust parameters using the sidebar and view the results in real-time.
@@ -49,12 +49,10 @@ def main():
     ### Visualization
     The results are displayed as interactive plots. You can hover over the lines to see specific values and use the toolbar for zooming and panning.
     """)
-    
+
     st.sidebar.header("Model Parameters")
-    scenario = st.sidebar.selectbox("Select Scenario",
-                                    ["High Transmission", "Effective Vaccination", "Seasonal Variation",
-                                     "High Natural Death Rate", "Waning Immunity"])
-    
+    scenario = st.sidebar.selectbox("Select Scenario", ["High Transmission", "Effective Vaccination", "Seasonal Variation", "High Natural Death Rate", "Waning Immunity"])
+
     if scenario == "High Transmission":
         params = {
             "beta": 0.8,
@@ -123,36 +121,42 @@ def main():
     initial_conditions = {
         "S": st.sidebar.number_input("Initial Susceptible (S)", value=9990),
         "E": st.sidebar.number_input("Initial Exposed (E)", value=10),
-        "I": st.sidebar.number_input("Initial Infectious (I)", value=0),
+        "I": st.sidebar.number_input("Initial Infectious (I)", value=1),
         "R": st.sidebar.number_input("Initial Recovered (R)", value=0),
         "D": st.sidebar.number_input("Initial Deceased (D)", value=0),
         "V": st.sidebar.number_input("Initial Vaccinated (V)", value=0),
         "F": st.sidebar.number_input("Initial Funeral (F)", value=0),
     }
-    
+
     if st.sidebar.button("Run Simulation"):
         if scenario == "Seasonal Variation":
-            results = run_simulation(params, initial_conditions, time_dependent_params)
+            results = run_simulation(params, initial_conditions, time_dependent_params=time_dependent_params)
         else:
             results = run_simulation(params, initial_conditions)
         plot_results(results)
         plot_scenarios(scenario, params, initial_conditions)
-    
+
     st.sidebar.header("Optimization")
+    data_file = st.sidebar.file_uploader("Upload real-world data", type=["csv"])
+    if data_file is not None:
+        observed_data = pd.read_csv(data_file)
+        st.session_state.observed_data = observed_data
+        st.write("Real-world data uploaded.")
+
     if st.sidebar.button("Generate Synthetic Data"):
         synthetic_data = generate_synthetic_data(params, initial_conditions, 160)
         st.session_state.synthetic_data = synthetic_data
         st.write("Synthetic data generated.")
-    
+
     if st.sidebar.button("Estimate Parameters"):
-        if 'synthetic_data' in st.session_state:
-            observed_data = st.session_state.synthetic_data
+        if 'observed_data' in st.session_state:
+            observed_data = st.session_state.observed_data
             initial_guess = [params[key] for key in params]
-            estimated_params = estimate_parameters(observed_data, initial_guess, initial_conditions)
+            estimated_params = estimate_parameters(observed_data, initial_guess, initial_conditions, method='minimize')
             st.write(f"Estimated Parameters: {estimated_params}")
         else:
-            st.write("Please generate synthetic data first.")
-    
+            st.write("Please upload real-world data first.")
+
     with st.expander("Tutorial"):
         st.write("""
         ### How to Use the SEIRDVF Model App
@@ -163,7 +167,6 @@ def main():
         5. **Estimate Parameters**: Click the "Estimate Parameters" button to optimize and find the best-fit parameters based on the synthetic data.
         6. **Interpret Results**: Examine the interactive plots to understand how the disease dynamics evolve over time.
         """)
-
 
 if __name__ == "__main__":
     main()

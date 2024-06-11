@@ -1,9 +1,9 @@
-from typing import Dict, Any
+from typing import Dict, Any, Callable
 import numpy as np
 from scipy.integrate import solve_ivp
 
 class SEIRDVFModel:
-    def __init__(self, params: Dict[str, Any], initial_conditions: Dict[str, float], time_dependent_params: Dict[str, Any] = None):
+    def __init__(self, params: Dict[str, float], initial_conditions: Dict[str, float], time_dependent_params: Dict[str, Callable] = None):
         self.params = params
         self.initial_conditions = initial_conditions
         self.time_dependent_params = time_dependent_params
