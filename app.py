@@ -6,9 +6,9 @@ from src.visualization import plot_results, plot_scenarios
 from src.utils import generate_synthetic_data, estimate_parameters
 
 def main():
-    st.title("Extended SEIRDVFB Model for Ebola")
+    st.title("SI+SIRDF Model for Zoonotic Diseases")
 
-    with st.expander("SEIRDVFB Model Documentation", expanded=False):
+    with st.expander("SI+SIRDF Model Documentation", expanded=False):
         st.markdown("""
         <style>
         .documentation {
@@ -27,35 +27,32 @@ def main():
 
         st.markdown("""
         <div class="documentation">
-        <h2>SEIRDVFB Model Documentation</h2>
-        <p>This app allows you to simulate the SEIRDVFB model for epidemic spread. Adjust parameters using the sidebar and view the results in real-time.</p>
+        <h2>SI+SIRDF Model Documentation</h2>
+        <p>This app allows you to simulate the SI+SIRDF model for zoonotic disease spread. Adjust parameters using the sidebar and view the results in real-time.</p>
         <h3>Parameters</h3>
         <ul>
-            <li><b>β</b>: Transmission coefficient</li>
-            <li><b>σ</b>: Rate at which exposed individuals become infectious</li>
-            <li><b>γ</b>: Recovery rate</li>
+            <li><b>β_HH</b>: Human-to-human transmission coefficient</li>
+            <li><b>β_HV</b>: Human-to-vector transmission coefficient</li>
+            <li><b>β_VH</b>: Vector-to-human transmission coefficient</li>
+            <li><b>β_VV</b>: Vector-to-vector transmission coefficient</li>
+            <li><b>γ_H</b>: Human recovery rate</li>
+            <li><b>γ_V</b>: Vector recovery rate</li>
             <li><b>δ</b>: Disease-induced death rate</li>
             <li><b>ν</b>: Vaccination rate</li>
             <li><b>ω</b>: Waning immunity rate</li>
             <li><b>κ</b>: Rate to funeral component</li>
             <li><b>φ</b>: Funeral transmission rate</li>
-            <li><b>β_HV</b>: Human-to-bat transmission rate</li>
-            <li><b>β_VH</b>: Bat-to-human transmission rate</li>
-            <li><b>γ_b</b>: Bat recovery rate</li>
         </ul>
         <h3>Initial Conditions</h3>
         <p>Adjust the initial number of individuals in each compartment:</p>
         <ul>
-            <li>Susceptible (S)</li>
-            <li>Exposed (E)</li>
-            <li>Infectious (I)</li>
+            <li>Susceptible Humans (S_H)</li>
+            <li>Infectious Humans (I_H)</li>
+            <li>Susceptible Vectors (S_V)</li>
+            <li>Infectious Vectors (I_V)</li>
             <li>Recovered (R)</li>
             <li>Deceased (D)</li>
-            <li>Vaccinated (V)</li>
             <li>Funeral (F)</li>
-            <li>Susceptible Bats (S_b)</li>
-            <li>Infectious Bats (I_b)</li>
-            <li>Recovered Bats (R_b)</li>
         </ul>
         <h3>Scenarios</h3>
         <p>Choose a scenario to explore:</p>
@@ -65,21 +62,18 @@ def main():
             <li><b>Custom Scenario</b>: Design a scenario that investigates an additional factor or intervention of your choice.</li>
         </ul>
         <h3>Model Equations</h3>
-        <p>The SEIRDVFB model is described by the following system of ordinary differential equations (ODEs):</p>
-        """, unsafe_allow_html=True)
+        <p>The SI+SIRDF model is described by the following system of ordinary differential equations (ODEs):</p>
+        """)
 
         st.latex(r"""
         \begin{aligned}
-        \frac{dS}{dt} &= - \beta \frac{S (I + \phi F)}{N} - \nu S + \omega R + \omega V - \beta_{HV} \frac{S I_b}{N} \\
-        \frac{dE}{dt} &= \beta \frac{S (I + \phi F)}{N} - \sigma E \\
-        \frac{dI}{dt} &= \sigma E - \gamma I - \delta I \\
-        \frac{dR}{dt} &= \gamma I - \omega R \\
-        \frac{dD}{dt} &= \kappa F \\
-        \frac{dV}{dt} &= \nu S - \omega V \\
-        \frac{dF}{dt} &= \delta I - \kappa F \\
-        \frac{dS_b}{dt} &= - \beta_{VH} \frac{S_b I}{N} \\
-        \frac{dI_b}{dt} &= \beta_{VH} \frac{S_b I}{N} - \gamma_b I_b \\
-        \frac{dR_b}{dt} &= \gamma_b I_b \\
+        \frac{dS_H}{dt} &= - \beta_{HH} \frac{S_H I_H}{N} - \beta_{HV} \frac{S_H I_V}{N} \\
+        \frac{dI_H}{dt} &= \beta_{HH} \frac{S_H I_H}{N} + \beta_{HV} \frac{S_H I_V}{N} - \gamma_H I_H - \delta I_H \\
+        \frac{dS_V}{dt} &= - \beta_{VV} \frac{S_V I_V}{N} - \beta_{VH} \frac{S_V I_H}{N} \\
+        \frac{dI_V}{dt} &= \beta_{VV} \frac{S_V I_V}{N} + \beta_{VH} \frac{S_V I_H}{N} - \gamma_V I_V \\
+        \frac{dR}{dt} &= \gamma_H I_H - \omega R \\
+        \frac{dD}{dt} &= \delta I_H \\
+        \frac{dF}{dt} &= \kappa F \\
         \end{aligned}
         """)
 
@@ -93,63 +87,63 @@ def main():
         <h3>Visualization</h3>
         <p>The results are displayed as interactive plots. You can hover over the lines to see specific values and use the toolbar for zooming and panning.</p>
         </div>
-        """, unsafe_allow_html=True)
+        """)
 
     st.sidebar.header("Model Parameters")
     scenario = st.sidebar.selectbox("Select Scenario", ["Hospital Capacity", "Seasonal Variation", "Funerary Transmission", "Safe and Dignified Burials"])
 
     default_params = {
         "Hospital Capacity": {
-            "beta": 0.3,
-            "sigma": 0.2,
-            "gamma": 0.1,
+            "beta_HH": 0.3,
+            "beta_HV": 0.2,
+            "beta_VH": 0.1,
+            "beta_VV": 0.05,
+            "gamma_H": 0.1,
+            "gamma_V": 0.05,
             "delta": 0.05,
             "nu": 0.05,
             "omega": 0.01,
             "kappa": 0.05,
-            "phi": 0.05,
-            "beta_HV": 0.1,
-            "beta_VH": 0.1,
-            "gamma_b": 0.05
+            "phi": 0.05
         },
         "Seasonal Variation": {
-            "beta": 0.3,
-            "sigma": 0.2,
-            "gamma": 0.1,
+            "beta_HH": 0.3,
+            "beta_HV": 0.2,
+            "beta_VH": 0.1,
+            "beta_VV": 0.05,
+            "gamma_H": 0.1,
+            "gamma_V": 0.05,
             "delta": 0.05,
             "nu": 0.05,
             "omega": 0.01,
             "kappa": 0.05,
-            "phi": 0.05,
-            "beta_HV": 0.1,
-            "beta_VH": 0.1,
-            "gamma_b": 0.05
+            "phi": 0.05
         },
         "Funerary Transmission": {
-            "beta": 0.3,
-            "sigma": 0.2,
-            "gamma": 0.1,
+            "beta_HH": 0.3,
+            "beta_HV": 0.2,
+            "beta_VH": 0.1,
+            "beta_VV": 0.05,
+            "gamma_H": 0.1,
+            "gamma_V": 0.05,
             "delta": 0.05,
             "nu": 0.05,
             "omega": 0.01,
             "kappa": 0.05,
-            "phi": 0.05,
-            "beta_HV": 0.1,
-            "beta_VH": 0.1,
-            "gamma_b": 0.05
+            "phi": 0.05
         },
         "Safe and Dignified Burials": {
-            "beta": 0.3,
-            "sigma": 0.2,
-            "gamma": 0.1,
+            "beta_HH": 0.3,
+            "beta_HV": 0.2,
+            "beta_VH": 0.1,
+            "beta_VV": 0.05,
+            "gamma_H": 0.1,
+            "gamma_V": 0.05,
             "delta": 0.05,
             "nu": 0.05,
             "omega": 0.01,
             "kappa": 0.05,
-            "phi": 0.01,
-            "beta_HV": 0.1,
-            "beta_VH": 0.1,
-            "gamma_b": 0.05
+            "phi": 0.01
         }
     }
 
@@ -157,41 +151,32 @@ def main():
 
     st.sidebar.header("Adjust Parameters")
     param_explanations = {
-        "beta": "β (Transmission coefficient)",
-        "sigma": "σ (Rate at which exposed individuals become infectious)",
-        "gamma": "γ (Recovery rate)",
+        "beta_HH": "β_HH (Human-to-human transmission coefficient)",
+        "beta_HV": "β_HV (Human-to-vector transmission coefficient)",
+        "beta_VH": "β_VH (Vector-to-human transmission coefficient)",
+        "beta_VV": "β_VV (Vector-to-vector transmission coefficient)",
+        "gamma_H": "γ_H (Human recovery rate)",
+        "gamma_V": "γ_V (Vector recovery rate)",
         "delta": "δ (Disease-induced death rate)",
         "nu": "ν (Vaccination rate)",
         "omega": "ω (Waning immunity rate)",
         "kappa": "κ (Rate to funeral component)",
-        "phi": "φ (Funeral transmission rate)",
-        "beta_HV": "β_HV (Human-to-bat transmission rate)",
-        "beta_VH": "β_VH (Bat-to-human transmission rate)",
-        "gamma_b": "γ_b (Bat recovery rate)"
+        "phi": "φ (Funeral transmission rate)"
     }
 
-
     for param, value in params.items():
-        if scenario == "Hospital Capacity" and param not in ["beta"]:
-            st.sidebar.write(f"{param_explanations[param]}: {value}")
-        elif scenario == "Seasonal Variation" and param not in ["beta"]:
-            st.sidebar.write(f"{param_explanations[param]}: {value}")
-        else:
-            params[param] = st.sidebar.slider(f"{param_explanations[param]}", min_value=0.0, max_value=1.0, value=value, step=0.01)
-            st.sidebar.write(f"Current {param_explanations[param]}: {params[param]}")
+        params[param] = st.sidebar.slider(f"{param_explanations[param]}", min_value=0.0, max_value=1.0, value=value, step=0.01)
+        st.sidebar.write(f"Current {param_explanations[param]}: {params[param]}")
 
     st.sidebar.header("Initial Conditions")
     initial_conditions = {
-        "S": st.sidebar.number_input("Initial Susceptible (S)", value=9990),
-        "E": st.sidebar.number_input("Initial Exposed (E)", value=10),
-        "I": st.sidebar.number_input("Initial Infectious (I)", value=1),
+        "S_H": st.sidebar.number_input("Initial Susceptible Humans (S_H)", value=9990),
+        "I_H": st.sidebar.number_input("Initial Infectious Humans (I_H)", value=10),
+        "S_V": st.sidebar.number_input("Initial Susceptible Vectors (S_V)", value=9990),
+        "I_V": st.sidebar.number_input("Initial Infectious Vectors (I_V)", value=10),
         "R": st.sidebar.number_input("Initial Recovered (R)", value=0),
         "D": st.sidebar.number_input("Initial Deceased (D)", value=0),
-        "V": st.sidebar.number_input("Initial Vaccinated (V)", value=0),
-        "F": st.sidebar.number_input("Initial Funeral (F)", value=0),
-        "S_b": st.sidebar.number_input("Initial Susceptible Bats (S_b)", value=9990),
-        "I_b": st.sidebar.number_input("Initial Infectious Bats (I_b)", value=10),
-        "R_b": st.sidebar.number_input("Initial Recovered Bats (R_b)", value=0)
+        "F": st.sidebar.number_input("Initial Funeral (F)", value=0)
     }
 
     days = st.sidebar.number_input("Number of Days for Simulation", value=160)
@@ -200,13 +185,16 @@ def main():
         if scenario == "Hospital Capacity":
             hospital_capacity = 0.1 * sum(initial_conditions.values())
             results = run_simulation(params, initial_conditions, days)
-            peak_infections = max(results['I'])
+            peak_infections = max(results['I_H'])
             if peak_infections > hospital_capacity:
                 st.warning(f"Warning: Peak infections ({peak_infections}) exceed hospital capacity ({hospital_capacity})")
             plot_results(results)
         elif scenario == "Seasonal Variation":
             time_dependent_params = {
-                'beta': lambda t: params['beta'] * (1 + 0.3 * np.sin(2 * np.pi * t / 365))
+                'beta_HH': lambda t: params['beta_HH'] * (1 + 0.3 * np.sin(2 * np.pi * t / 365)),
+                'beta_HV': lambda t: params['beta_HV'] * (1 + 0.3 * np.sin(2 * np.pi * t / 365)),
+                'beta_VH': lambda t: params['beta_VH'] * (1 + 0.3 * np.sin(2 * np.pi * t / 365)),
+                'beta_VV': lambda t: params['beta_VV'] * (1 + 0.3 * np.sin(2 * np.pi * t / 365))
             }
             results = run_simulation(params, initial_conditions, days, time_dependent_params=time_dependent_params)
             plot_results(results)
@@ -247,7 +235,7 @@ def main():
 
     with st.expander("Tutorial"):
         st.write("""
-        ### How to Use the SEIRDVFB Model App
+        ### How to Use the SI+SIRDF Model App
         1. **Adjust Parameters**: Use the sliders and number inputs in the sidebar to set the parameters and initial conditions.
         2. **Select a Scenario**: Choose from Hospital Capacity, Seasonal Variation, or Custom Scenario.
         3. **Run Simulation**: Click the "Run Simulation" button to execute the model and visualize the results.

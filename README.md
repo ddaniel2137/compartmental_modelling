@@ -1,100 +1,110 @@
-
-# SEIRDVFB Epidemic Model Simulation
+# SISIRDF Epidemic Model Simulation
 
 ## Overview
 
-This repository contains an implementation of the SEIRDVFB compartmental model for simulating the spread of infectious diseases, particularly focusing on the Ebola epidemic. The SEIRDVFB model includes the following compartments: Susceptible (S), Exposed (E), Infectious (I), Recovered (R), Deceased (D), Vaccinated (V), Funeral (F), Susceptible Bats (S_b), Infectious Bats (I_b), and Recovered Bats (R_b).
+This repository contains an implementation of the SISIRDF compartmental model for simulating the spread of infectious diseases. The SISIRDF model includes the following compartments: Susceptible Humans (S_h), Infectious Humans (I_h), Susceptible Vectors (S_v), Infectious Vectors (I_v), Recovered (R), Deceased (D), and Funerals (F).
 
-This project aims to model complex transmission dynamics, including the effects of social behaviors, seasonal variations, vaccination strategies, and waning immunity. The implementation allows for advanced parameter estimation using real-world data and optimization techniques.
+This project aims to model complex transmission dynamics, including the effects of human-to-human, vector-to-human, human-to-vector, and vector-to-vector transmission. The implementation allows for time-dependent parameters and solving the model using scipy's `solve_ivp` function.
 
 ## Features
 
-- **Dynamic Transmission Rates**: Incorporates detailed social interaction parameters and seasonal variations.
-- **Advanced Parameter Estimation**: Utilizes optimization techniques such as `minimize`, `least_squares`, and `differential_evolution` for parameter estimation.
-- **Real-World Data Integration**: Allows for uploading real-world data to validate and adjust model parameters.
-- **Streamlit Interface**: Provides an interactive interface for adjusting parameters, running simulations, and visualizing results.
+- **Time-Dependent Parameters**: Incorporates time-dependent transmission rates (beta_hh, beta_hv, beta_vh, beta_vv) to model varying transmission dynamics over time.
+- **Numerical Integration**: Utilizes scipy's `solve_ivp` function for solving the system of differential equations.
+- **Customizable Initial Conditions**: Allows setting initial conditions for each compartment.
 
 ## Installation
 
 1. Clone the repository:
 
-   git clone https://github.com/ddaniel2137/compartmental_modelling.git
-   cd SEIRDVFB_Model
+   git clone https://github.com/your-username/SISIRDF_Model.git
+   cd SISIRDF_Model
 
 2. Create a virtual environment:
 
-   python3.12 -m venv venv
+   python -m venv venv
    source venv/bin/activate # On Windows, use `venv\Scripts\activate`
 
 3. Install the required packages:
 
    pip install -r requirements.txt
 
-## Running the Application
-
-To run the Streamlit application, use the following command:
-
-streamlit run app.py
-
-You can access the application in your web browser at `http://localhost:8501`.
-
 ## Usage
 
-### Adjust Parameters
+To use the SISIRDF model, follow these steps:
 
-- **Model Parameters**: Use the sidebar to adjust model parameters such as transmission coefficient (β), recovery rate (γ), vaccination rate (ν), etc.
-- **Initial Conditions**: Set the initial number of individuals in each compartment (S, E, I, R, D, V, F, S_b, I_b, R_b).
-- **Scenarios**: Select from predefined scenarios including Hospital Capacity, Seasonal Variation, Funerary Transmission, and Safe and Dignified Burials.
+1. Import the `SISIRDFModel` class from `models.py`:
 
-### Running Simulations
+   from models import SISIRDFModel
 
-1. Adjust the parameters and initial conditions using the sidebar.
-2. Select a scenario from the dropdown.
-3. Click "Run Simulation" to execute the model and visualize the results.
+2. Create an instance of the `SISIRDFModel` class by providing the necessary parameters and initial conditions:
 
-### Optimization
+   params = {
+       'beta_hh': 0.1,
+       'beta_hv': 0.05,
+       'beta_vh': 0.05,
+       'beta_vv': 0.1,
+       'sigma': 0.2,
+       'gamma_h': 0.1,
+       'gamma_v': 0.1,
+       'delta': 0.01,
+       'nu': 10,
+       'omega': 0.01,
+       'kappa': 0.1,
+       'phi': 0.05
+   }
 
-1. **Generate Synthetic Data**: Click the "Generate Synthetic Data" button to create data for testing the optimization.
-2. **Upload Real-World Data**: Upload a CSV file containing real-world data for parameter estimation.
-3. **Estimate Parameters**: Click the "Estimate Parameters" button to optimize and find the best-fit parameters based on the provided data.
+   initial_conditions = {
+       'S_h': 9990,
+       'I_h': 10,
+       'S_v': 10000,
+       'I_v': 0,
+       'R': 0,
+       'D': 0,
+       'F': 0
+   }
+
+   model = SISIRDFModel(params, initial_conditions)
+
+3. Define the time points at which you want to solve the model:
+
+   import numpy as np
+   t = np.linspace(0, 100, 1000)
+
+4. Solve the model using the `solve` method:
+
+   solution = model.solve(t)
+
+5. Access the solution for each compartment:
+
+   S_h, I_h, S_v, I_v, R, D, F = solution
 
 ## Model Description
 
-The SEIRDVFB model is defined by the following differential equations:
+The SISIRDF model is defined by the following differential equations:
 
-## Model Description
-
-The SEIRDVFB model is defined by the following differential equations:
-
-## Model Description
-
-The SEIRDVFB model is defined by the following differential equations:
-
-$$
+$
 \begin{aligned}
-\frac{d\mathrm{S}}{dt} &= - \beta \frac{\mathrm{S} (\mathrm{I} + \phi \mathrm{F})}{\mathrm{N}} - \nu \mathrm{S} + \omega \mathrm{R} + \omega \mathrm{V} - \beta_{HV} \frac{\mathrm{S} \mathrm{I_b}}{\mathrm{N}} \\
-\frac{d\mathrm{E}}{dt} &= \beta \frac{\mathrm{S} (\mathrm{I} + \phi \mathrm{F})}{\mathrm{N}} - \sigma \mathrm{E} \\
-\frac{d\mathrm{I}}{dt} &= \sigma \mathrm{E} - \gamma \mathrm{I} - \delta \mathrm{I} \\
-\frac{d\mathrm{R}}{dt} &= \gamma \mathrm{I} - \omega \mathrm{R} \\
-\frac{d\mathrm{D}}{dt} &= \kappa \mathrm{F} \\
-\frac{d\mathrm{V}}{dt} &= \nu \mathrm{S} - \omega \mathrm{V} \\
-\frac{d\mathrm{F}}{dt} &= \delta \mathrm{I} - \kappa \mathrm{F} \\
-\frac{d\mathrm{S_b}}{dt} &= - \beta_{VH} \frac{\mathrm{S_b} \mathrm{I}}{\mathrm{N}} \\
-\frac{d\mathrm{I_b}}{dt} &= \beta_{\mathrm{VH}} \frac{\mathrm{S_b} \mathrm{I}}{\mathrm{N}} - \gamma_b \mathrm{I_b} \\
-\frac{d\mathrm{R_b}}{dt} &= \gamma_b \mathrm{I_b} \\
+\frac{dS_h}{dt} &= -\beta_{hh} \frac{S_h I_h}{N} - \beta_{hv} \frac{S_h I_v}{N} \\
+\frac{dI_h}{dt} &= \beta_{hh} \frac{S_h I_h}{N} + \beta_{hv} \frac{S_h I_v}{N} - (\gamma_h + \delta) I_h \\
+\frac{dS_v}{dt} &= \nu - \beta_{vv} \frac{S_v I_v}{N} - \beta_{vh} \frac{S_v I_h}{N} - \sigma S_v \\
+\frac{dI_v}{dt} &= \beta_{vv} \frac{S_v I_v}{N} + \beta_{vh} \frac{S_v I_h}{N} - (\gamma_v + \sigma) I_v \\
+\frac{dR}{dt} &= \gamma_h I_h - \omega R \\
+\frac{dD}{dt} &= \delta I_h \\
+\frac{dF}{dt} &= \kappa I_h + \phi I_v
 \end{aligned}
-$$
+$
 
 ### Parameters
 
-- **β**: Transmission coefficient
-- **σ**: Rate at which exposed individuals become infectious
-- **γ**: Recovery rate
-- **δ**: Disease-induced death rate
-- **ν**: Vaccination rate
+- **β_hh**: Human-to-human transmission rate
+- **β_hv**: Vector-to-human transmission rate
+- **β_vh**: Human-to-vector transmission rate
+- **β_vv**: Vector-to-vector transmission rate
+- **σ**: Vector death rate
+- **γ_h**: Human recovery rate
+- **γ_v**: Vector recovery rate
+- **δ**: Human disease-induced death rate
+- **ν**: Vector birth rate
 - **ω**: Waning immunity rate
-- **κ**: Rate at which deceased individuals are moved to the funeral component
-- **φ**: Rate at which funerals contribute to new infections
-- **β_HV**: Human-to-bat transmission rate
-- **β_VH**: Bat-to-human transmission rate
-- **γ_b**: Bat recovery rate
+- **κ**: Funeral transmission rate from humans
+- **φ**: Funeral transmission rate from vectors

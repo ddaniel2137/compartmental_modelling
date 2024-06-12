@@ -2,7 +2,7 @@ from typing import Dict, Callable
 import numpy as np
 from scipy.integrate import solve_ivp
 
-class SEIRDVFBModel:
+class SISIRDFModel:
     def __init__(self, params: Dict[str, float], initial_conditions: Dict[str, float], time_dependent_params: Dict[str, Callable] = {}):
         self.params = params
         self.initial_conditions = initial_conditions
@@ -10,42 +10,48 @@ class SEIRDVFBModel:
         self.N = sum(initial_conditions.values())  # Total population
 
     def _deriv(self, t, y):
-        S, E, I, R, D, V, F, S_b, I_b, R_b = y
+        S_h, I_h, S_v, I_v, R, D, F = y
         N = self.N
 
         # Handle time-dependent parameters
-        if self.time_dependent_params and 'beta' in self.time_dependent_params:
-            beta = self.time_dependent_params['beta'](t)
+        if self.time_dependent_params and 'beta_hh' in self.time_dependent_params:
+            beta_hh = self.time_dependent_params['beta_hh'](t)
         else:
-            beta = self.params['beta']
+            beta_hh = self.params['beta_hh']
 
-        if self.time_dependent_params and 'phi' in self.time_dependent_params:
-            phi = self.time_dependent_params['phi']
+        if self.time_dependent_params and 'beta_hv' in self.time_dependent_params:
+            beta_hv = self.time_dependent_params['beta_hv'](t)
         else:
-            phi = self.params['phi']
+            beta_hv = self.params['beta_hv']
+
+        if self.time_dependent_params and 'beta_vh' in self.time_dependent_params:
+            beta_vh = self.time_dependent_params['beta_vh'](t)
+        else:
+            beta_vh = self.params['beta_vh']
+
+        if self.time_dependent_params and 'beta_vv' in self.time_dependent_params:
+            beta_vv = self.time_dependent_params['beta_vv'](t)
+        else:
+            beta_vv = self.params['beta_vv']
 
         sigma = self.params['sigma']
-        gamma = self.params['gamma']
+        gamma_h = self.params['gamma_h']
+        gamma_v = self.params['gamma_v']
         delta = self.params['delta']
         nu = self.params['nu']
         omega = self.params['omega']
         kappa = self.params['kappa']
-        beta_HV = self.params['beta_HV']
-        beta_VH = self.params['beta_VH']
-        gamma_b = self.params['gamma_b']
+        phi = self.params['phi']
 
-        dSdt = -beta * S * (I + phi * F) / N - nu * S + omega * R + omega * V - beta_HV * S * I_b / N
-        dEdt = beta * S * (I + phi * F) / N - sigma * E
-        dIdt = sigma * E - gamma * I - delta * I
-        dRdt = gamma * I - omega * R
-        dDdt = kappa * F
-        dVdt = nu * S - omega * V
-        dFdt = delta * I - kappa * F
-        dS_bdt = -beta_VH * S_b * I / N
-        dI_bdt = beta_VH * S_b * I / N - gamma_b * I_b
-        dR_bdt = gamma_b * I_b
+        dS_hdt = -beta_hh * S_h * I_h / N - beta_hv * S_h * I_v / N
+        dI_hdt = beta_hh * S_h * I_h / N + beta_hv * S_h * I_v / N - (gamma_h + delta) * I_h
+        dS_vdt = nu - beta_vv * S_v * I_v / N - beta_vh * S_v * I_h / N - sigma * S_v
+        dI_vdt = beta_vv * S_v * I_v / N + beta_vh * S_v * I_h / N - (gamma_v + sigma) * I_v
+        dRdt = gamma_h * I_h - omega * R
+        dDdt = delta * I_h
+        dFdt = kappa * I_h + phi * I_v
 
-        return [dSdt, dEdt, dIdt, dRdt, dDdt, dVdt, dFdt, dS_bdt, dI_bdt, dR_bdt]
+        return [dS_hdt, dI_hdt, dS_vdt, dI_vdt, dRdt, dDdt, dFdt]
 
     def solve(self, t: np.ndarray) -> np.ndarray:
         y0 = list(self.initial_conditions.values())

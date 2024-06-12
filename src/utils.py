@@ -12,9 +12,9 @@ def generate_synthetic_data(params, initial_conditions, days, noise_level=0.1):
 def estimate_parameters(observed_data, initial_guess, initial_conditions, method='minimize'):
     def objective(params):
         params_dict = {
-            'beta': params[0], 'sigma': params[1], 'gamma': params[2], 'mu': params[3],
-            'delta': params[4], 'nu': params[5], 'omega': params[6], 'kappa': params[7], 'phi': params[8],
-            'beta_HV': params[9], 'beta_VH': params[10], 'gamma_b': params[11]
+            'beta_HH': params[0], 'beta_HV': params[1], 'beta_VH': params[2], 'beta_VV': params[3],
+            'gamma_H': params[4], 'gamma_V': params[5], 'delta': params[6], 'nu': params[7],
+            'omega': params[8], 'kappa': params[9], 'phi': params[10]
         }
         simulated_data = run_simulation(params_dict, initial_conditions)
         
