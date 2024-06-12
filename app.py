@@ -170,6 +170,7 @@ def main():
         "gamma_b": "γ_b (Bat recovery rate)"
     }
 
+
     for param, value in params.items():
         if scenario == "Hospital Capacity" and param not in ["beta"]:
             st.sidebar.write(f"{param_explanations[param]}: {value}")

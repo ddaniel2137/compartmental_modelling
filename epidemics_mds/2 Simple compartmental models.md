@@ -320,13 +320,11 @@ Now, we can invoke the solver. For the purposes of this demonstration, we will s
 You do not have to specify max_step; the solver will try to guess an appropriate value. However, this typically is fairly parsimonious and the resulting curves can look quite choppy.
 
 ```
-res = solve_ivp(
-    fun=deriv,
-    t_span=(0, 100),
-    y0=y_0,
-    args=(beta, gamma),
-    max_step=1
-)
+res = solve_ivp(fun=deriv,
+                t_span=(0, 100),
+                y0=y_0,
+                args=(beta, gamma),
+                max_step=1)
 ```
 
 The solver returns an 0deResult object. This provides several attributes, the most important of which are the following:
@@ -963,24 +961,24 @@ Figure 2.17 Solutions of a SIRS model for $\Re_{0}=2.5, \tau=4$ and $\tau_{R}$ (
 
 ## Computational Note 2.5 Waning immunity
 
-By far the most commonly modeled aspect of immunity is periodicity due to waning immunity (as described in Subsection 2.3.3). Fundamentally, a SIRS model is no different in its computational execution than the previous compartmental models. We begin by defining the key initial characteristics, including $\omega$, the rate of waning immunity. It is generally more convenient to represent $\omega$ as $\overline{\tau_{R}}-1$, the inverse of the duration of immunity.
+By far the most commonly modeled aspect of immunity is periodicity due to waning immunity (as described in Subsection 2.3.3). Fundamentally, a SIRS model is no different in its computational execution than the previous compartmental models. We begin by defining the key initial characteristics, including $\omega$, the rate of waning immunity. It is generally more convenient to represent $\omega$ as $\overline{\tau_{R}}^{-1}$, the inverse of the duration of immunity.
 
 ```
 I_0 = 1e-2
 S_0 = 1 - I_0
 R_0 = 0
 y_0 = (S_0, I_0, R_0)
-RO = 2.5
+R0 = 2.5
 tau = 4
 gamma = 1/tau
 tau_R = 50
 omega = 1/tau_R
-beta = RO * gamma
+beta = R0 * gamma
 ```
 
 We can then use the approach used for prior ODE solutions to arrive at a numerical result.
 
-A notebook implementing the contents of this Computational Note is available on the book's companion Github repository in the folder I ch02/ sir_ models.
+A notebook implementing the contents of this Computational Note is available on the book's companion Github repository in the folder /ch02/sir_ models.
 
 In practice, however, waning is not a homogeneous rate process. Often, a better approximation is to assume that immunity lasts a certain time $\omega^{-1}$. Instead of defraying a fraction of the immune population at every step, we can use a delay differential equation (DDE) that simply returns the quantity of individuals who have become immune at $t-\omega^{-1}$ to susceptibility:
 
@@ -1107,7 +1105,7 @@ def deriv(t, y, beta, gamma, sigma):
 
 The versatility of compartmental epidemic models and their representationand solution-as systems of ODEs is that these models can be expanded with ease, by simply changing the derivative function's definition. Other than ensuring that the sigma parameter is taken, solving a SEIR model's IVP computationally is no different from a SIR model.
 
-A notebook implementing the contents of this Computational Note is available on the book's companion Github repository in the folder / ch02/ sir_ mode7s.
+A notebook implementing the contents of this Computational Note is available on the book's companion Github repository in the folder /ch02/sir_ models.
 
 ### 2.4.3 Models of recovery into carrier state
 
@@ -1117,7 +1115,7 @@ Definition 2.30 (Carrier). A carrier is an individual who is asymptomatic but ca
 
 ### 2.4.3.1 Recovery into carrier state with equal infectiousness
 
-The SIRC model assumes that carriers eventually clear the infection and become immune, in $\overline{\tau_{c}}$ time. We will denote the rate of carriers who become immune as $\omega=\bar{\tau}_{c}-1$, in line with the way we denoted waning immunity. (See Figs. 2.22 and 2.23.)
+The SIRC model assumes that carriers eventually clear the infection and become immune, in $\overline{\tau_{c}}$ time. We will denote the rate of carriers who become immune as $\omega=\bar{\tau_c}^{-1}$, in line with the way we denoted waning immunity. (See Figs. 2.22 and 2.23.)
 
 From the perspective of mass action, a susceptible individual may contract the infection from a carrier or an infectious individual. Therefore we have to treat $I$ and $C$ as a single compartment for the mass action term, assuming for this iteration of the model that infectiousness is identical for symptomatic and asymptomatic carriers. We denote the fraction of individuals who recover into a carrier state $(C)$, rather than immune recovery $(R)$ by $\theta$. Finally, we use the transfer term $\omega C$ to denote the rate at which carriers recover. This gives us the system of differential equations
 
@@ -1127,7 +1125,7 @@ Figure 2.22 Solutions of a SIRC model for $\Re_{0}=6.0, \tau=12$, the waning rat
 
 ![](https://cdn.mathpix.com/cropped/2024_06_11_fe9fdebf2e9671e7e798g-48.jpg?height=391&width=670&top_left_y=1088&top_left_x=386)
 
-Figure 2.23 The SIRC model results in a carrier state $C$ and a recovered state $R . \theta$ denotes the proportion of infected who go on to be carriers. $\omega$ is the rate at which carriers convert to noninfectious, immune recovery.
+Figure 2.23 The SIRC model results in a carrier state $C$ and a recovered state $R$. $\theta$ denotes the proportion of infected who go on to be carriers. $\omega$ is the rate at which carriers convert to noninfectious, immune recovery.
 
 $$
 \begin{align*}
@@ -1155,7 +1153,7 @@ def deriv(t, y, beta, gamma, omega, theta):
     return dSdt, dIdt, dRdt, dCdt
 ```
 
-A notebook implementing the contents of this Computational Note is available on the book's companion Github repository in the folder / ch02/ sir_ mode1s.
+A notebook implementing the contents of this Computational Note is available on the book's companion Github repository in the folder /ch02/sir_models.
 
 ### 2.4.3.2 Accounting for reduced infectiousness
 
@@ -1253,7 +1251,7 @@ $$
 
 3. The $\mathfrak{R}_{0}$ of the system is obtained by taking the spectral radius of $\mathbf{F} \mathbf{V}^{-1}$.
 
-Definition 2.31 (Next-generation matrix). The matrix $\mathbf{F V} \mathbf{V}^{-1}$ is called the next generation matrix. Its spectral radius (see Definition 2.32), as evaluated at the disease-free equilibrium, equals the $\Re_{0}$.
+Definition 2.31 (Next-generation matrix). The matrix $\mathbf{FV}^{-1}$ is called the next generation matrix. Its spectral radius (see Definition 2.32), as evaluated at the disease-free equilibrium, equals the $\Re_{0}$.
 
 Consider, for instance, the SIR model described in (2.6). Our $x$ and $y$ vectors are, of course,
 
@@ -1320,41 +1318,40 @@ S, E, I, R, beta, mu, phi, sigma, gamma
 ```
 
 Next, we define $x$ :
-
-$X=$ Matrix(np.array([E, I]).T)
-
-We can now define the vector-valued functions $F$ and $V$ :
-
-Fvec $=$ Matrix(np.array([beta $*$ S $*$ I, O]).T)
-
 ```
+X = Matrix(np.array([E, I]).T)
+```
+We can now define the vector-valued functions $F$ and $V$ :
+```
+Fvec = Matrix(np.array([beta * S * I, 0]).T)
+
+
 Vvec = Matrix(np.array([(mu + sigma) * E, -sigma * E
     + (gamma + mu) * I]).T)
 ```
 
 We evaluate Fvec at $S=1$ :
-
-Fvec $=$ Fvec.subs(\{S: 1$\})$
-
-Vvec $=$ Vvec.subs(\{S: 1\})
-
+```
+Fvec = Fvec.subs({S: 1})
+Vvec = Vvec.subs({S: 1})
+```
 SymPy has a convenient function to calculate the Jacobian of a vector-valued function. Recall that the next-generation matrix $\mathbf{F} \mathbf{V}^{-1}$ is the product of the Jacobian of $F$ with respect to $x$ multiplied by the inverse of the Jacobian of $V$ in respect of $x$. We may write this as
-
-ngm $=$ Fvec.jacobian(X) * Vvec.jacobian(X).inv()
-
-The function .eigenvals() returns the spectrum (the list of all eigenvalues) of the matrix. Unfortunately, SymPy cannot automatically determine the dominant eigenvalue, but this should not be difficult manually.
+```
+ngm = Fvec.jacobian(X) * Vvec.jacobian(X).inv()
+```
+The function ```.eigenvals()``` returns the spectrum (the list of all eigenvalues) of the matrix. Unfortunately, SymPy cannot automatically determine the dominant eigenvalue, but this should not be difficult manually.
 
 Factoring the dominant eigenvalue gives us a nice-looking output:
-
-factor(1ist(ngm.eigenvals().keys())[0])
-
+```
+factor(list(ngm.eigenvals().keys())[0])
+```
 $$
 \frac{\beta \sigma}{(\gamma+\mu)(\mu+\sigma)}
 $$
 
 Symbolic application of the next-generation matrix may often be your best choice to obtain $\Re_{0}$ from the description of a compartmental model as a differential equation. This is so in particular if the system has many compartments and a large number of variables, as we will indeed encounter later on in models of more complex disease.
 
-A notebook implementing the contents of this Computational Note is available on the book's companion Github repository in the folder / ch02/ symbol ic_ ro.
+A notebook implementing the contents of this Computational Note is available on the book's companion Github repository in the folder /ch02/symbolic_r0.
 
 ### 2.5.3 Determining $\mathfrak{R}_{0}$ from epidemiological data
 
@@ -1379,9 +1376,9 @@ other individuals they have interacted with, or at least not be able to provide 
 
 In this example, we will be using NetworkX to estimate $\mathfrak{R}_{0}$ from contact tracing data.
 
-We begin by instantiating a directed graph (DiGraph) object:
+We begin by instantiating a directed graph (```DiGraph```) object:
 
-## $G=n x . D i G r a p h()$
+```G = nx.DiGraph()```
 
 There are many ways to build up a graph object in NetworkX, but where we do not intend to attach complex properties, the easiest is by far to provide edges, and let NetworkX create the nodes for us.
 
@@ -1405,11 +1402,8 @@ EDGES = {"O": ["LA3", "LA8", "LA6", "NY15", "NY9", "NY4", "NY3",
     "NY14": ["NY5", "NJ1"],
     "NJ1": ["NY21"],
     "NY5": ["NY2", "NY19"],
-```
-
-```
-"NY2": ["NY19"],
-"NY19": ["NY8"]}
+    "NY2": ["NY19"],
+    "NY19": ["NY8"]}
 ```
 
 We can then merge this into the graph using a simple nested iterator:
@@ -1417,14 +1411,16 @@ We can then merge this into the graph using a simple nested iterator:
 ```
 for o in EDGES:
     for d in EDGES[o]:
-    G.add_edge(o, d)
+        G.add_edge(o, d)
 ```
 
 Finally, we can obtain the mean outdegree, which is our estimator for $\mathfrak{R}_{0}$, by obtaining the outdegree of each node (which is what G.out_degree returns), slice the array to get an array only of the outdegree values, then obtain the average:
+```
+np.mean(np.array(list(G.out_degree))[:,1].astype("uint8"))
 
-np.mean(np.array(1ist(G.out_degree))[:,1].astype("uint8"))
+>>> 1.0256410256410255
+```
 
->> 1.0256410256410255
 
 ### 2.5.3.2 Wallinga-Lipsitch method
 
@@ -1464,14 +1460,13 @@ Table 2.2 lays out the moment-generating functions of commonly used distribution
 ## Computational Note 2.11 Symbolic determination of the momentgenerating function
 
 SciPy's optimize subpackage offers a very useful function, curve_fit, which can fit an arbitrary function to data. Given a time series, we can fit the model $I(t)=c e^{r t}$ to our actual data. First, we define the function that represents this model:
-
+```
 def exp_model(t, c, r):
-
-return $c * n p . \exp (r * t)$
-
+    return c * np.exp(r * t)
+```
 Note that this is equivalent to applying a logarithm transform and fit a simple linear model. We will, however, for the sake of clarity, use the exponential formulation.
 
-Next, we fit this model to a time series. In this example, we will be using a COVID-19 data set for the United States during the first wave (March-June 2020), using pd.read_csv():
+Next, we fit this model to a time series. In this example, we will be using a COVID-19 data set for the United States during the first wave (March-June 2020), using ```pd.read_csv()```:
 
 ```
 data = pd.read_csv("https://raw.githubusercontent.com/nytimes/\
@@ -1481,9 +1476,9 @@ data = pd.read_csv("https://raw.githubusercontent.com/nytimes/\
 ```
 
 Next, to control for weekly variations in reporting, we take the seven-day moving average:
-
+```
 data["cases"] = data.cases.rol1ing(7).mean()
-
+```
 We filter the time series for our desired dates:
 
 ```
@@ -1495,15 +1490,15 @@ Now, we can fit our model against the time series to obtain the growth rate:
 
 ```
 popt, pcov = optimize.curve_fit(exp_model,
-    data.index,
-    data.cases,
-    p0=(1e-2, 1e-6),
-    maxfev=10000)
+                                data.index,
+                                data.cases,
+                                p0=(1e-2, 1e-6),
+                                maxfev=10000)
 ```
 
 The resulting popt object is a 2-length array that contains the values of $c$ and $r$ obtained by fitting the model against the data. Fig. 2.25 shows actual case counts during the period under examination and the exponential fit using the parameters we obtained through the above.
 
-We now have $r$ (as popt[1]), which allows us to calculate the momentgenerating function at $-r$. We know from metaanalyses (e.g., Griffin et al. [80]) that $\operatorname{Normal}(5,1.15)$ a good estimate of the parameters for the generation time of COVID-19. We can symbolically evaluate the moment-generating function
+We now have $r$ (as ```popt[1]```), which allows us to calculate the moment-generating function at $-r$. We know from metaanalyses (e.g., Griffin et al. [80]) that $\operatorname{Normal}(5,1.15)$ a good estimate of the parameters for the generation time of COVID-19. We can symbolically evaluate the moment-generating function
 
 $$
 M(t)_{\mu, \sigma}=e^{t \mu+\frac{1}{2} \sigma^{2} t^{2}}
@@ -1511,31 +1506,31 @@ $$
 
 using SymPy. First, we initialize the variables:
 
-mu, sigma, t, blamda = sympy.symbols("mu sigma t lambda")
+```mu, sigma, t, lambda = sympy.symbols("mu sigma t lambda")```
 
 Next, we express the moment-generating function in those terms:
 
-```
-mgf_norma1 = E ** (t * mu + (sigma ** 2 * t ** 2)/2)
-```
 
-In the above, E is the constant $e$, which is imported from SymPy. We can now estimate the $\mathfrak{R}_{0}$ by evaluating the moment-generating function at $\mu=5$ and $\sigma=1.15$, at $-t$. $-t$, of course, is -1 * popt[1].
+```mgf_normal = E ** (t * mu + (sigma ** 2 * t ** 2)/2)```
+
+
+In the above, E is the constant $e$, which is imported from SymPy. We can now estimate the $\mathfrak{R}_{0}$ by evaluating the moment-generating function at $\mu=5$ and $\sigma=1.15$, at $-t$. $-t$, of course, is ```-1 * popt[1]```.
 
 ```
 1/mgf_norma1.subs({"t": -1 * popt[1],
-    "mu": 5,
-    "sigma ": 1.15})
+                    "mu": 5,
+                    "sigma ": 1.15})
 ```
 
 ![](https://cdn.mathpix.com/cropped/2024_06_11_fe9fdebf2e9671e7e798g-61.jpg?height=638&width=1077&top_left_y=226&top_left_x=226)
 
 Figure 2.25 Exponential fit on a time series of COVID-19 in the United States in early 2020. Data from The New York Times, based on reports from state and local health agencies.
 
-The . subs( ) method provided by SymPy applies to all kinds of symbolic objects. .subs () takes a dictionary of symbols and replaces them with a specified value, essentially parametrically evaluating the expression.
+The ```.subs( )``` method provided by SymPy applies to all kinds of symbolic objects. ```.subs()``` takes a dictionary of symbols and replaces them with a specified value, essentially parametrically evaluating the expression.
 
 Notably, our result of an $\Re_{0}$ of 1.49 is rather lower than what is commonly understood to be the $\Re_{0}$ of COVID-19. This is for a number of reasons, which highlight some of the shortcomings of the Wallinga-Lipsitch method. Our estimate is only as good as our fit for the growth rate and the distribution of the generation time. Obtaining the generation time is often nontrivial in practice, and often depends on the availability of monitoring and tracing tools, which might not be available at the very beginning of the epidemic, just when this model is at its most powerful.
 
-A notebook implementing the contents of this Computational Note is available on the book's companion Github repository in the folder / ch02/ symbo 7 ic_ mgf.
+A notebook implementing the contents of this Computational Note is available on the book's companion Github repository in the folder/ch02/symbolic_mgf.
 
 The Wallinga-Lipsitch solution is a convenient method in the very beginning to obtain the value of $\mathfrak{R}_{0}$ as long as there is some information about the generation time or serial interval, but its accuracy hinges greatly on the adequacy of this information. In other words, the wrong distribution fit over the data will yield erroneous results. Regardless of distribution used, it is crucial to document the assumptions employed when describing a Wallinga-Lipsitch estimate of $\Re_{0}$.
 
@@ -1591,11 +1586,7 @@ The mean age at infection method is widely used where the mean age of an individ
 
 Similarly to $\mathfrak{R}_{0}$, the time-dependent reproduction number $\mathfrak{R}_{t}$ also permits a number of methods of estimation. Harvey and Kattuman [83] proposed a particularly convenient estimator for $\Re_{t}$, namely
 
-$$
-\begin{equation*}
-\hat{R}_{k, \tau, t}=\frac{\overbrace{\tau-1}^{\sum_{j=0}^{k-1} y_{t-j}}}{\sum_{\tau=\text {-shifted }}^{k-\text { length moving average }} y_{t-\tau-j}^{k-1}}, \tag{2.57}
-\end{equation*}
-$$
+$\hat{R}_{k, \tau, t}=\frac{\overbrace{k-1}^{k-\text { length moving average }}}{\sum_{j=0}^{\sum_{j=0}^{k-1} y_{t-j} y_{t-\tau-j}}}$,
 
 where $\tau$ is the generation interval, and $k$ is a smoothing constant. Harvey and Kattuman notes that setting $k$ to 7 eliminates intra-week variations, whereas a value used for $\tau$ depends on the infectious process. Conveniently, the fraction in Eq. (2.57) can be expressed as the fraction of a $k$-day rolling sum and a second $k$-day rolling sum shifted by $\tau$ days. We shall use this to our advantage in Computational Note 2.12.
 
@@ -1605,19 +1596,24 @@ As noted above, Eq. (2.57) for $\Re_{t}$ can be expressed as the fraction of the
 
 We begin, after ingesting our data into a Pandas data frame, by creating a column for the 7 -day rolling sum:
 
-$d f[" 7 m s "]=d f . n e w \_c a s e s . r o 11 i n g(7) . s u m()$
+```
+df["7ms"] = df.new_cases.rolling(7).sum()
+```
+We assign another column to represent the denominator, which is essentially the ```7ms```column shifted back by $\tau$ :
 
-We assign another column to represent the denominator, which is essentially the $7 \mathrm{~ms}$ column shifted back by $\tau$ :
-
-$d f\left[" 7 m s \_t a u "\right]=d f[" 7 m s "] . s h i f t(4)$
+```
+df["7ms_tau"] = df["7ms"].shift(4)
+```
 
 Finally, we obtain our $\mathfrak{R}_{t}$ by dividing the two columns:
 
-$d f[$ "Rt"] = df["7ms"]/df["7ms_tau"]
+```
+df["Rt"] = df["7ms"]/df["7ms_tau"]
+```
 
 The result of this calculation is shown in Fig. 2.26. Note that because of the rolling sum and the shift, as well as because of rapid initial dynamics, there is often an unrealistically high spike in the earliest days of an outbreak. It may be worthwhile to limit $\Re_{t}$ plots to the period once the epidemic is no longer in its earliest phases.
 
-A notebook implementing the contents of this Computational Note is available on the book's companion Github repository in the folder / ch02/rt_ estimation.
+A notebook implementing the contents of this Computational Note is available on the book's companion Github repository in the folder /ch02/rt_estimation.
 
 ### 2.5.5 Estimating recovery rate
 
@@ -1709,21 +1705,19 @@ For nonlinear systems, this is rarely an easily ascertainable figure, but can be
 
 The caveat of least-squares solvers is that they are the sledgehammers of parameter estimation: highly effective but rather crude. Among the most significant shortcomings of curve fitting algorithms is the fact that outbreaks do not neatly conform to the simple compartmental model's neat sinusoidal curves. It may be somewhat unfair to lay blame for that at the door of curve fitting algorithms, since the root of the issue lies not with the curve fitting algorithm itself but with compartmental models in general, and their inability to accommodate more complex nonlinearities, such as successive waves of infection with accuracy. Curve fitting algorithms are, however, very effective where there is relatively little data and speed is prioritized over accuracy. Thus, a curve-fitting approach can yield useful estimates of multiple parameters in a single outbreak, but would typically struggle with aperiodic waves from emergent strains, as we witnessed with, e.g., the Delta and later the Omicron VOCs of COVID-19.
 
-## Computational Note 2.13 Multiparameter estimation with Imfit and Emcee
+## Computational Note 2.13 Multiparameter estimation with lmfit and Emcee
 
 The advantage of multiparameter estimation is that-as the name suggests-it estimates multiple parameters contemporaneously and in relation to each other. This is particularly useful if we have information about more than one compartment (e.g., number of infectious cases and number of decedents). In this computational example, we are using a SEIRD model to estimate a whole host of parameters all at once: $\beta, \gamma, \sigma$, and $C F R$. We do so in three steps:
 
 1. First, we define the model, our starting conditions, and our best guesses as to the parameters.
-2. Next, we obtain a best estimate for $\beta, \gamma, \sigma$, and $C F R$ by performing a Nelder-Mead minimization with $1 \mathrm{mfit}$. This is often better than the more commonly used Levenberg-Marquardt algorithm, which tends to have a somewhat more difficult time with exponential processes, which is of course the kind of problem that describes epidemics.
+2. Next, we obtain a best estimate for $\beta, \gamma, \sigma$, and $C F R$ by performing a Nelder-Mead minimization with ```lmfit``` This is often better than the more commonly used Levenberg-Marquardt algorithm, which tends to have a somewhat more difficult time with exponential processes, which is of course the kind of problem that describes epidemics.
 3. Finally, we use a Markov chain Monte Carlo (MCMC) simulation to get an idea of how good our estimates are.
 
 Once we have obtained the data (in this case, from Ritchie et al. [84], for the United States, between 06 March 2020 (the first day when cases exceeded a hundred new diagnoses per day) and the end of July 2021) and cut it down to the columns on cases and deaths, we calculate a ten-day rolling sum of cases as a rough estimate of active cases at any one time. From this, we create our $X$ and $Y$ vectors (in keeping with the convention in scientific Python as to what the dependent and independent variable vectors ought to be named):
 
 ```
 Y = df[["total_cases", "total_deaths"]].dropna().to_numpy()
-```
 
-```
 X = np.array(list(range(0, len(Y))), dtype=float)
 ```
 
@@ -1745,17 +1739,17 @@ We also need to define some sensible starting values. We have data on $I(0)$ and
 ```
 N = 329.5e6
 E0 = 2 * Y[0, 0]
-IO = Y[0, 0]
-RO = 0
-DO = Y[0, 1]
-SO = N - EO - IO - DO
-starting_values = (SO, E0, IO, RO, DO)
+I0 = Y[0, 0]
+R0 = 0
+D0 = Y[0, 1]
+S0 = N - E0 - I0 - D0
+starting_values = (S0, E0, I0, R0, D0)
 ```
 
 Next, we need to describe our parameters, i.e., the vector $\theta$. The "values" we provide here actually matter rather little; their primary purpose is to give the fitting algorithm somewhere to start.
 
 ```
-theta = 1mfit.Parameters()
+theta = lmfit.Parameters()
 theta.add("beta", value=0.5, min=0, max=5)
 theta.add("gamma", value=1/10, min=0, max=1)
 theta.add("sigma", value=1/3, min=0, max=1)
@@ -1778,33 +1772,30 @@ def residual(theta, X, Y, starting_values=starting_values):
     return (Y.T - res.y[[2, 4], : ]).ravel()
 ```
 
-Note that we need to deconstruct the Parameters object theta. Ordinarily, iterating over a Parameters object yields the keys, i.e., the names of the parameters as strings. Since that is not all that helpful to us, we obtain a dictionary of values with the .valuesdict() method, and obtain each of the values by their key.
+Note that we need to deconstruct the ```Parameters``` object ```theta```. Ordinarily, iterating over a ```Parameters``` object yields the keys, i.e., the names of the parameters as strings. Since that is not all that helpful to us, we obtain a dictionary of values with the ```.valuesdict()``` method, and obtain each of the values by their key.
 
-Now, we can call 1mfit.minimize on the residual, and the parameter set theta:
+Now, we can call ```lmfit.minimize``` on the residual, and the parameter set theta:
 
 ```
 fit = lmfit.minimize(residual,
     theta,
-    method="ne1der",
+    method="nelder",
     args=(X, Y, starting_values))
 ```
 
 Calling the fit object will provide a quite helpful short summary of the values, including the estimates with their standard error. Our model seems to indicate, for this period, a best fit for $\beta=0.492, \gamma=0.408$, and a CFR of 0.006 (i.e., $0.6 \%$ ). These suggest a $\Re_{0}$ of around 1.2 , which is a quite reasonable approximation if we consider that case recognition and reporting in the early days of the pandemic was rather imperfect.
 
-We are finally interested in how good our fit is. Out of the box, calling a fit object or the report_fit() function in $1 \mathrm{mfit.printfuncs,} \mathrm{provides} \mathrm{a} \mathrm{range} \mathrm{of}$ standard metrics ( $Q^{2}$, Akaike's information criterion and Bayesian information criterion), but a much better and more illuminating way is to obtain the posterior probability distribution of the parameters, given observed data. For this, we create a fit with Emcee, a package for Markov chain Monte Carlo sampling:
+We are finally interested in how good our fit is. Out of the box, calling a fit object or the ```report_fit()``` function in ```lmfit.printfuncs``` provides a range of standard metrics ( $Q^{2}$, Akaike's information criterion and Bayesian information criterion), but a much better and more illuminating way is to obtain the posterior probability distribution of the parameters, given observed data. For this, we create a fit with Emcee, a package for Markov chain Monte Carlo sampling:
 
 ```
-res = 1mfit.minimize(1ambda x: residual(x, X, Y, starting_values),
+res = lmfit.minimize(1ambda x: residual(x, X, Y, starting_values),
     method="emcee",
-```
-
-```
-burn=300,
-steps=1_500,
-thin=20,
-params=theta,
-is_weighted=False,
-progress=True)
+    burn=300,
+    steps=1_500,
+    thin=20,
+    params=theta,
+    is_weighted=False,
+    progress=True)
 ```
 
 Note that this is not really a fit; we are not fitting anything, and this only works if the results have already been fit once, as we did above. Rather, this uses the fitting API to estimate the posterior distributions. From this, we can construct a corner plot as seen in Fig. 2.27. The corner plot shows the posterior distributions of the parameters with respect to each other. This allows us to reason about the degree to which our estimates for one value are contingent on the value of another, and their relationship.
@@ -1813,7 +1804,7 @@ Since we did not weight our data (we assume that measurement uncertainty is equa
 
 Reading corner plots is nontrivial and requires some experience, but it is a helpful tool to understand how the parameters were estimated and what the effect of an error into a particular direction would be on the other parameters.
 
-A notebook implementing the contents of this Computational Note is available on the book's companion Github repository in the folder / ch02/mu1 tiparameter.
+A notebook implementing the contents of this Computational Note is available on the book's companion Github repository in the folder /ch02/multiparameter.
 
 ![](https://cdn.mathpix.com/cropped/2024_06_11_fe9fdebf2e9671e7e798g-73.jpg?height=1189&width=1185&top_left_y=232&top_left_x=172)
 

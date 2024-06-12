@@ -80,13 +80,10 @@ $$
 \frac{d\mathrm{V}}{dt} &= \nu \mathrm{S} - \omega \mathrm{V} \\
 \frac{d\mathrm{F}}{dt} &= \delta \mathrm{I} - \kappa \mathrm{F} \\
 \frac{d\mathrm{S_b}}{dt} &= - \beta_{VH} \frac{\mathrm{S_b} \mathrm{I}}{\mathrm{N}} \\
-\frac{d\mathrm{I_b}}{dt} &= \beta_{VH} \frac{\mathrm{S_b} \mathrm{I}}{\mathrm{N}} - \gamma_b \mathrm{I_b} \\
+\frac{d\mathrm{I_b}}{dt} &= \beta_{\mathrm{VH}} \frac{\mathrm{S_b} \mathrm{I}}{\mathrm{N}} - \gamma_b \mathrm{I_b} \\
 \frac{d\mathrm{R_b}}{dt} &= \gamma_b \mathrm{I_b} \\
 \end{aligned}
 $$
-
-
-
 
 ### Parameters
 

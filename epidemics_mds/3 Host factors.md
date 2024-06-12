@@ -24,7 +24,7 @@ To an extent, all populations are heterogeneous when it comes to the transmissio
 As a guideline, heterogeneity is meaningful if
 
 - there is a significant difference in terms of infection between strata $(\mathrm{RR} \geq$ 1.5 ), or
-- there is a significant difference in terms of outcomes between strata (RR $\geq$ 1.5 ), or
+- there is a significant difference in terms of outcomes between strata $(\mathrm{RR}\geq$ 1.5 ), or
 - there is a significant issue of health equity involved, e.g., an underserved stratum with a much higher risk.
 
 
@@ -168,7 +168,7 @@ d_Is = Matrix(np.array([(beta_HH * n_H - gamma_H) * I_H \
 
 Now, we can take the Jacobian of the compartments to get the matrix of coefficients:
 
-coeffs = d_Is.jacobian(infectious_system)
+```coeffs = d_Is.jacobian(infectious_system)```
 
 $$
 \left[\begin{array}{cc}
@@ -203,13 +203,14 @@ $\left[\begin{array}{cc}1.95 & 0.1 \\ 0.4 & 1.55\end{array}\right]$
 
 Now, we can calculate an approximation of $\Re_{0}$ for the coupled period. This is best accomplished by creating a list of the absolute values of the spectrum (returned by J.eigenvals()) and taking the maximum:
 
+```
 R_0 = max([abs(i) for i in J.eigenvals()])
-
-## >> 2.03284271247462
+>> 2.03284271247462
+```
 
 Thus we can now characterize the infectious dynamics during the coupled phase as proportional to the term $e^{\Re_{0} t}$.
 
-A notebook implementing the contents of this Computational Note is available on the book's companion Github repository in the folder Ich03/stratified_ ro.
+A notebook implementing the contents of this Computational Note is available on the book's companion Github repository in the folder /ch03/stratified_r0.
 
 The computational approach outlined above is particularly useful, because it gives us insights about the eventual fate of the pathogen in the population. $\Re_{0}$ alone does not determine the dynamics of the whole disease process, especially not the transient interval in the beginning, which is largely governed by initial population ratios and, in real-world use cases, stochasticity, but it does determine the long-term fate of the infectious process. As such, if the overall $\mathfrak{R}_{0}$ as calculated using the method in Computational Note 3.1 is below zero, the infection will eventually die out. This can be accelerated through targeted interventions, in particular vaccinating the strata that have a higher stratum-wise $\Re_{0}$.
 
@@ -273,8 +274,8 @@ This gives us the system of ordinary differential equations outlined in Eq. (3.7
 
 $$
 \begin{align*}
-& \frac{d I}{d t}=\underbrace{\beta S I}_{\text {mass action }}+\underbrace{\beta f_{T} S T}_{\text {from untreated }}-\underbrace{\gamma I}_{\text {removals }}-\underbrace{\theta I}_{\text {from treated }}, \\
-& \frac{d T}{d t}=\underbrace{\theta I}_{\text {treatment influx }}-\underbrace{\frac{1}{\tau_{T}} T}_{\text {treated }},  \tag{3.7}\\
+& \frac{d I}{d t}=\underbrace{\beta S I}_{\text {from untreated}}+\underbrace{\beta _{T} S T}_{\text {from treated }}-\underbrace{\gamma I}_{\text {untreated}}-\underbrace{\theta I}_{\text {treated}}, \\
+& \frac{d T}{d t}=\underbrace{\theta I}_{\text {treatment influx }}-\underbrace{\frac{1}{\tau_{T}} T}_{\text {treated recoveries }},  \tag{3.7}\\
 & \frac{d R}{d t}=\underbrace{\gamma I}_{\text {recovery }}+\underbrace{\frac{1}{\tau_{T}} T}_{\text {treated recoveries }} .
 \end{align*}
 $$
@@ -364,10 +365,7 @@ import numpy as np
 import networkx as nx
 df = pd.read_csv("pcbi.1001109.s001.csv",
     skiprows=24,
-```
-
-```
-header=None,
+    header=None,
     sep=";")[[0, 1]]
 df = df.rename(columns={0: "F", 1: "M"})
 n = nx.convert_matrix.from_pandas_edgelist(df,
@@ -387,7 +385,7 @@ mixing_matrix = nx.degree_mixing_matrix(n, normalized=False)
 And we calculate the sizes of the risk groups by counting distinct values of sexual encounters (i.e., the degree list of the graph $n$ ):
 
 ```
-number_by_degree = pd.DataFrame(1ist(n.degree),
+number_by_degree = pd.DataFrame(list(n.degree),
     columns=["id", "degree"]).\
     groupby("degree").\
     count().\
@@ -402,7 +400,7 @@ Because this uses NumPy's built-in vector arithmetic, it is remarkably fast; res
 
 This example illustrates how we can gain insights from very complex models. Transmission networks are particularly important for STIs and for contact tracing in the initial phases of an outbreak. The $\mathbf{b}$ matrix we obtained can be used to parameterize any of the compartmental models we have discussed previously, with highly granular and individualized data.
 
-A notebook implementing the contents of this Computational Note is available on the book's companion Github repository in the folder / ch03/ contact_ waifw.
+A notebook implementing the contents of this Computational Note is available on the book's companion Github repository in the folder /ch03/contact_waifw.
 
 The calculation of a mixing matrix with hundreds of classes illustrates a profound point about computational methods: for large problem sizes that would be difficult to
 
@@ -427,7 +425,8 @@ $$
 & \frac{d S_{U}}{d t}=-\underbrace{S_{U}(\underbrace{\beta_{U, U} I_{U}}_{U \rightarrow U}+\underbrace{\beta_{U, L} I_{L}}_{U \rightarrow L})}_{\text {mass action }}+v_{L} S_{L}, \\
 & \frac{d I_{L}}{d t}=\underbrace{S_{L}\left(\beta_{L, L} I_{L}+\beta_{L, U} I_{U}\right)}_{\text {new infections }}-\underbrace{v_{L} I_{L}}_{\text {aging }}-\underbrace{\gamma I_{L}}_{\text {recovery }}, \\
 & \frac{d I_{U}}{d t}=\underbrace{S_{U}\left(\beta_{U, U} I_{U}+\beta_{U, L} I_{L}\right)}_{\text {new cases }}+\underbrace{v_{L} I_{L}}_{\text {aging }}-\underbrace{\gamma I_{U}}_{\text {recovery }},  \tag{3.8}\\
-& \frac{d R_{L}}{d t}=\underbrace{\gamma I_{L}}_{\text {recoveries }}-\underbrace{v_{L} R_{L},}_{\text {aging }}, \underbrace{\gamma I_{\text {graduation }}}_{\text {recoveries }}-\underbrace{\theta R_{U}}_{\text {gres }} .
+& \frac{d R_{L}}{d t}=\underbrace{\gamma I_{L}}_{\text {recoveries }}-\underbrace{v_{L} R_{L},}_{\text {aging }} \\
+& \frac{d R_{L}}{d t}=\underbrace{\gamma I_{U}}_{\text {recoveries }}-\underbrace{\theta R_{U},}_{\text {graduation}}.
 \end{align*}
 $$
 
@@ -473,7 +472,7 @@ res = solve_ivp(fun=deriv,
     method="BDF")
 ```
 
-A notebook implementing the contents of this Computational Note is available on the book's companion Github repository in the folder / ch03/age_ differential_ sir.
+A notebook implementing the contents of this Computational Note is available on the book's companion Github repository in the folder /ch03/age_differential_sir.
 
 As Fig. 3.6 shows, the proportion of individuals who are immune in the Lower Sixth is gradually decreasing, while the proportion of individuals who are immune in the Upper Sixth grows steadily. The reason behind that is that all population growth accrues to $S_{L}$, since the only way to access the Upper Sixth compartments is to go through the Lower Sixth. Consequently, the Lower Sixth stratum is fed a constant stream of immunologically naive individuals.
 
@@ -550,20 +549,20 @@ where $\mathbf{M}^{\eta}$ is a composite matrix, as described in Eq. (3.11) with
 
 To illustrate the methodology of what Mistry et al. [104] called "adaptive sampling," our method of creating synthetic families proceeds as follows:
 
-1. We use census microdata, obtained from IPUMS [106], to calculate the distribution of household sizes. The American community survey (ACS) product of the United States census uses the FAMSIZE attribute for family size, which is a good approximation of the household size. We are interested in a single figure per household, and for this reason, we group by SERIAL, the unique identifier assigned to each household, and take the first value (using groupby("SERIAL").first()).
-2. Next, we determine the age of the head of household given the family size by filtering the data set to families of the desired size, then sampling the AGE property.
-3. Next, we determine the likelihood of a spouse, given the age of the head of household: we filter all heads of household of the age from the previous step, and join their spouse's age (a spouse would have a RELATE property of 2 and share the head of household's SERIAL). This yields $\mathrm{NaN}$ if the individual has no spouse, and the spouse's age otherwise. Thus it acts as both a way of
+1. We use census microdata, obtained from IPUMS [106], to calculate the distribution of household sizes. The American community survey (ACS) product of the United States census uses the ```FAMSIZE``` attribute for family size, which is a good approximation of the household size. We are interested in a single figure per household, and for this reason, we group by ```SERIAL```, the unique identifier assigned to each household, and take the first value (using ```groupby("SERIAL").first()```).
+2. Next, we determine the age of the head of household given the family size by filtering the data set to families of the desired size, then sampling the ```AGE``` property.
+3. Next, we determine the likelihood of a spouse, given the age of the head of household: we filter all heads of household of the age from the previous step, and join their spouse's age (a spouse would have a ```RELATE``` property of 2 and share the head of household's ```SERIAL```). This yields $\mathrm{NaN}$ if the individual has no spouse, and the spouse's age otherwise. Thus it acts as both a way of
 determining whether the head of household would have a spouse, and what their age would be.
 4. We determine the remaining number of individuals to be allocated by subtracting 1 (if there is no spouse) or 2 (if there is) from the household size.
 5. We also determine, given the age of the head of household, the size of the household and the age of the spouse, the likelihood that any other person in the family is a child, rather than another relative (e.g., parents, siblings, more distant relatives). We do so by filtering the microdata sample to the age of the head of household, to the age of the spouse, and to families the size of the household from the first step. This gives us $p_{c}$, the probability that a person in the family is a child of the head of household.
 6. For each remaining individual to be allocated, if any, we generate a random number between $[0,1]$. If $\operatorname{rand}()<p_{c}$, the new person will be a child. If not, it will be another relative.
-7. If the new person is a child, we filter for the age of the head of household and the age of the spouse, and sample the ages of children (RELATE is 3) who are in households with the corresponding head of household's and spouse's age. We do the same for other relatives, except that we sample the ages of other relatives (RELATE is any value other than 1,2 , or 3 ).
+7. If the new person is a child, we filter for the age of the head of household and the age of the spouse, and sample the ages of children (```RELATE``` is 3) who are in households with the corresponding head of household's and spouse's age. We do the same for other relatives, except that we sample the ages of other relatives (```RELATE``` is any value other than 1,2 , or 3 ).
 
 In the same vein, we can sample from various other populations, e.g., to determine the faculty age distribution; we can use occupation-filtered census data and determine an age distribution we can sample. In most cases, for sufficiently large data sets, simple sampling of the empirical data, filtered for age conditionals with a tolerance ( $\pm 2$ years tend to give a fairly good approximation), is very fast and allows full population simulations of mid- to large US states and mid-size nations on commodity hardware.
 
 An alternative to simple empirical sampling is to use the observed data to fit multivariate probability distributions, and sample these for the conditional probability. The key difference between these approaches is that whereas the latter is more computationally expensive, it gives "smoother" values towards the edges. If the source microdata does not contain at least one 100 -year-old individual, then there will be no data at all about them at all. The smaller the available microdata set, the stronger the case for fitting multivariate distributions, rather than simply sampling the empirical observations filtered by conditionals.
 
-A notebook implementing the contents of this Computational Note is available on the book's companion Github repository in the folder / ch03/ contact_ matrix.
+A notebook implementing the contents of this Computational Note is available on the book's companion Github repository in the folder /ch03/contact_matrix.
 
 ### 3.2.5 Age-dependent continuous heterogeneities
 
